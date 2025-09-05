@@ -26,7 +26,10 @@ DJANGO_APPS = [
 ]
 
 LOCAL_APPS = [
-    # Aquí irán tus apps personalizadas
+    'tournaments',
+    'teams', 
+    'matches',
+    'events',
 ]
 
 THIRD_PARTY_APPS = [
