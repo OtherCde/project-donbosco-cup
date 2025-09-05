@@ -6,7 +6,7 @@ from .models import Team, Player
 class PlayerInline(admin.TabularInline):
     model = Player
     extra = 1
-    fields = ['first_name', 'last_name', 'jersey_number', 'position', 'dni']
+    fields = ['first_name', 'last_name', 'jersey_number', 'position', 'dni', 'birth_date']
     ordering = ['jersey_number']
 
 

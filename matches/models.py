@@ -26,8 +26,8 @@ class Match(models.Model):
     def __str__(self):
         match_teams = self.match_teams.all()
         if match_teams.count() == 2:
-            home_team = match_teams.filter(is_home=True).first()
-            away_team = match_teams.filter(is_home=False).first()
+            home_team = match_teams.first()
+            away_team = match_teams.last()
             if home_team and away_team:
                 return f"{home_team.team.name} vs {away_team.team.name}"
         return f"Match {self.id} - {self.date}"

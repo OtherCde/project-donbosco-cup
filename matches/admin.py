@@ -31,8 +31,8 @@ class MatchAdmin(admin.ModelAdmin):
     def match_display(self, obj):
         teams = obj.match_teams.all()
         if teams.count() == 2:
-            home_team = teams.filter(is_home=True).first()
-            away_team = teams.filter(is_home=False).first()
+            home_team = teams.first()
+            away_team = teams.last()
             if home_team and away_team:
                 return format_html(
                     '<strong>{}</strong> {} - {} <strong>{}</strong>',
@@ -58,7 +58,7 @@ class MatchTeamAdmin(admin.ModelAdmin):
     
     fieldsets = (
         ('Match Information', {
-            'fields': ('match', 'team', 'is_home')
+            'fields': ('match', 'team')
         }),
         ('Results', {
             'fields': ('goals', 'penalty_goals', 'result', 'points')
