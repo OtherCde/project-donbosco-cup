@@ -15,8 +15,5 @@ DATABASES = {
     }
 }
 
-# Usar SECRET_KEY por defecto si no está en .env
-try:
-    SECRET_KEY = env('SECRET_KEY')
-except:
-    SECRET_KEY = 'tu-secret-key-aqui-desarrollo'
+# SECRET_KEY para desarrollo
+SECRET_KEY = 'tu-secret-key-aqui-desarrollo-donbosco-cup-2024'
