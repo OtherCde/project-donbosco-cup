@@ -1,3 +1,5 @@
 from django.shortcuts import render
 
-# Create your views here.
+def index(request):
+    """Vista para la página principal del torneo"""
+    return render(request, 'index.html')

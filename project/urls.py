@@ -21,6 +21,8 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # Página principal del torneo
+    path('', include('tournaments.urls')),
     # Rutas para TORNEOS
     path('tournaments/', include('tournaments.urls')),
     # Rutas para EQUIPOS
