@@ -1,0 +1,268 @@
+{% load static %}
+<!DOCTYPE HTML>
+<!--
+	Phantom by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html lang="es">
+	<head>
+		<title>Guía de Uso - Copa Don Bosco 2024</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="{% static 'css/main.css' %}" />
+		<noscript><link rel="stylesheet" href="{% static 'css/noscript.css' %}" /></noscript>
+	</head>
+	<body class="is-preload">
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<div class="inner">
+
+							<!-- Logo -->
+								<a href="/" class="logo">
+									<span class="symbol"><img src="{% static 'images/logo.svg' %}" alt="" /></span><span class="title">Copa Don Bosco 2024</span>
+								</a>
+
+							<!-- Nav -->
+								<nav>
+									<ul>
+										<li><a href="#menu">Menu</a></li>
+									</ul>
+								</nav>
+
+						</div>
+					</header>
+
+				<!-- Menu -->
+					<nav id="menu">
+						<h2>Menu</h2>
+						<ul>
+							<li><a href="/">Inicio</a></li>
+							<li><a href="#guia">Guía de Uso</a></li>
+							<li><a href="#comandos">Comandos</a></li>
+							<li><a href="/admin/">Acceso Admin</a></li>
+						</ul>
+					</nav>
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+							<header id="guia">
+								<h1>Guía de Uso del Sistema<br />
+								Copa Don Bosco 2024</h1>
+								<p>Esta guía te ayudará a configurar y gestionar el torneo paso a paso.</p>
+							</header>
+
+							<!-- Estadísticas -->
+							<section>
+								<h2>📊 Estado Actual del Sistema</h2>
+								<div class="row">
+									<div class="col-4 col-12-medium">
+										<h3>🏆 Torneos</h3>
+										<p>Gestiona los torneos principales del sistema.</p>
+										<a href="/admin/tournaments/tournament/" class="button primary">Ver Torneos</a>
+									</div>
+									<div class="col-4 col-12-medium">
+										<h3>📊 Categorías</h3>
+										<p>Organiza los grupos por edad y promoción.</p>
+										<a href="/admin/tournaments/tournamentcategory/" class="button primary">Ver Categorías</a>
+									</div>
+									<div class="col-4 col-12-medium">
+										<h3>⚽ Equipos</h3>
+										<p>Registra los equipos participantes.</p>
+										<a href="/admin/teams/team/" class="button primary">Ver Equipos</a>
+									</div>
+								</div>
+							</section>
+
+							<!-- Guía Paso a Paso -->
+							<section>
+								<h2>📋 Cómo Configurar el Torneo - Paso a Paso</h2>
+								
+								<div class="row">
+									<div class="col-6 col-12-medium">
+										<h3>1. Crear el Torneo Principal</h3>
+										<p>Primero crea el torneo principal (ej: "Copa Don Bosco 2024"). Este será el contenedor de todas las categorías y partidos.</p>
+										<ul>
+											<li>Nombre del torneo</li>
+											<li>Año del torneo</li>
+											<li>Fechas de inicio y fin</li>
+										</ul>
+										<a href="/admin/tournaments/tournament/add/" class="button">Crear Torneo</a>
+									</div>
+									<div class="col-6 col-12-medium">
+										<h3>2. Configurar Categorías por Edad</h3>
+										<p>Crea las categorías del torneo (ej: "Grupo 1 (1979-1987)", "Grupo 2 (1989-1996)").</p>
+										<ul>
+											<li>Cada categoría representa un grupo de edades similares</li>
+											<li>Mantiene la competencia justa</li>
+											<li>Permite múltiples campeones</li>
+										</ul>
+										<a href="/admin/tournaments/tournamentcategory/add/" class="button">Crear Categoría</a>
+									</div>
+								</div>
+
+								<div class="row">
+									<div class="col-6 col-12-medium">
+										<h3>3. Definir Fases del Torneo</h3>
+										<p>Para cada categoría, crea las fases (ej: "Fase de Grupos", "Eliminatorias").</p>
+										<ul>
+											<li><strong>Liga:</strong> Todos contra todos</li>
+											<li><strong>Eliminatorias:</strong> Partidos de eliminación</li>
+										</ul>
+										<a href="/admin/tournaments/phase/add/" class="button">Crear Fase</a>
+									</div>
+									<div class="col-6 col-12-medium">
+										<h3>4. Crear Rondas</h3>
+										<p>Dentro de cada fase, crea las rondas (ej: "Fecha 1", "Fecha 2", "Semifinal").</p>
+										<ul>
+											<li>Organiza los partidos por fechas</li>
+											<li>Permite seguimiento del progreso</li>
+											<li>Facilita la programación</li>
+										</ul>
+										<a href="/admin/tournaments/round/add/" class="button">Crear Ronda</a>
+									</div>
+								</div>
+
+								<div class="row">
+									<div class="col-6 col-12-medium">
+										<h3>5. Registrar Equipos</h3>
+										<p>Crea los equipos para cada categoría (ej: "Promoción 1979", "Promoción 1985").</p>
+										<ul>
+											<li>Cada equipo representa una promoción</li>
+											<li>Incluye nombre y abreviatura</li>
+											<li>Logo opcional</li>
+										</ul>
+										<a href="/admin/teams/team/add/" class="button">Crear Equipo</a>
+									</div>
+									<div class="col-6 col-12-medium">
+										<h3>6. Agregar Jugadores</h3>
+										<p>Para cada equipo, agrega los jugadores con su información personal.</p>
+										<ul>
+											<li>Nombre completo</li>
+											<li>DNI (único por equipo)</li>
+											<li>Fecha de nacimiento</li>
+											<li>Posición y número de camiseta</li>
+										</ul>
+										<a href="/admin/teams/player/add/" class="button">Agregar Jugador</a>
+									</div>
+								</div>
+
+								<div class="row">
+									<div class="col-6 col-12-medium">
+										<h3>7. Crear Partidos</h3>
+										<p>Usa los comandos de gestión para crear partidos automáticamente.</p>
+										<ul>
+											<li>Asignación automática de equipos</li>
+											<li>Fechas y horarios</li>
+											<li>Estados del partido</li>
+										</ul>
+										<a href="/admin/matches/match/add/" class="button">Crear Partido</a>
+									</div>
+									<div class="col-6 col-12-medium">
+										<h3>8. Registrar Eventos</h3>
+										<p>Durante los partidos, registra los eventos (goles, tarjetas).</p>
+										<ul>
+											<li>Goles con jugador</li>
+											<li>Tarjetas amarillas y rojas</li>
+											<li>Detalles adicionales</li>
+										</ul>
+										<a href="/admin/events/matchevent/add/" class="button">Registrar Evento</a>
+									</div>
+								</div>
+							</section>
+
+							<!-- Comandos Útiles -->
+							<section id="comandos">
+								<h2>🛠️ Comandos Útiles para Automatizar</h2>
+								<p>Puedes usar estos comandos en la terminal para automatizar tareas:</p>
+								
+								<div class="row">
+									<div class="col-4 col-12-medium">
+										<h3>Configurar Torneo Completo</h3>
+										<div style="background: #f8f9fa; padding: 15px; border-radius: 5px; font-family: monospace; margin: 10px 0;">
+											python manage.py setup_tournament
+										</div>
+										<p>Crea un torneo completo con categorías, fases y rondas predefinidas.</p>
+									</div>
+									<div class="col-4 col-12-medium">
+										<h3>Crear Equipos de Ejemplo</h3>
+										<div style="background: #f8f9fa; padding: 15px; border-radius: 5px; font-family: monospace; margin: 10px 0;">
+											python manage.py create_sample_teams
+										</div>
+										<p>Crea equipos de ejemplo para una categoría específica.</p>
+									</div>
+									<div class="col-4 col-12-medium">
+										<h3>Generar Partidos</h3>
+										<div style="background: #f8f9fa; padding: 15px; border-radius: 5px; font-family: monospace; margin: 10px 0;">
+											python manage.py generate_matches
+										</div>
+										<p>Genera partidos automáticamente para una ronda específica.</p>
+									</div>
+								</div>
+							</section>
+
+							<!-- Información sobre Base de Datos -->
+							<section>
+								<h2>💾 Base de Datos - Registro Permanente</h2>
+								<div class="row">
+									<div class="col-12">
+										<div style="background: #e7f3ff; border: 1px solid #b3d9ff; border-radius: 5px; padding: 20px; margin: 20px 0;">
+											<h3>¿Por qué es importante la base de datos?</h3>
+											<p><strong>Todos los datos que ingreses se guardarán permanentemente en la base de datos.</strong></p>
+											<p>Esto te permitirá:</p>
+											<ul>
+												<li>Mantener un historial completo de todos los torneos</li>
+												<li>Generar estadísticas y reportes</li>
+												<li>Reutilizar equipos y jugadores en futuros torneos</li>
+												<li>Tener un registro oficial de todos los partidos y resultados</li>
+												<li>Crear archivos de respaldo para futuros torneos</li>
+											</ul>
+										</div>
+									</div>
+								</div>
+							</section>
+
+							<!-- Acceso Rápido -->
+							<section>
+								<h2>🔗 Acceso Rápido al Admin</h2>
+								<div class="row">
+									<div class="col-6 col-12-medium">
+										<a href="/admin/" class="button primary large fit">Acceder al Panel de Administración</a>
+									</div>
+									<div class="col-6 col-12-medium">
+										<a href="/" class="button fit">Volver al Inicio</a>
+									</div>
+								</div>
+							</section>
+						</div>
+					</div>
+
+				<!-- Footer -->
+					<footer id="footer">
+						<div class="inner">
+							<section>
+								<h2>Contacto</h2>
+								<p>Para más información sobre el torneo o el sistema, contacta a los organizadores.</p>
+							</section>
+							<ul class="copyright">
+								<li>&copy; Copa Don Bosco 2024. Todos los derechos reservados.</li>
+								<li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+							</ul>
+						</div>
+					</footer>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="{% static 'js/jquery.min.js' %}"></script>
+			<script src="{% static 'js/browser.min.js' %}"></script>
+			<script src="{% static 'js/breakpoints.min.js' %}"></script>
+			<script src="{% static 'js/util.js' %}"></script>
+			<script src="{% static 'js/main.js' %}"></script>
+
+	</body>
+</html>

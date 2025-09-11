@@ -10,8 +10,8 @@ class Team(models.Model):
     logo_url = models.URLField(blank=True, null=True, help_text="Team logo URL")
     
     class Meta:
-        verbose_name = "Team"
-        verbose_name_plural = "Teams"
+        verbose_name = "Equipo"
+        verbose_name_plural = "Equipos"
         unique_together = ['tournament_category', 'name']
         ordering = ['tournament_category', 'name']
     
@@ -39,8 +39,8 @@ class Player(models.Model):
     )
     
     class Meta:
-        verbose_name = "Player"
-        verbose_name_plural = "Players"
+        verbose_name = "Jugador"
+        verbose_name_plural = "Jugadores"
         unique_together = [
             ['team', 'jersey_number'],
             ['team', 'dni']

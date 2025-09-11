@@ -44,6 +44,7 @@
 							<li><a href="#torneo">Torneo</a></li>
 							<li><a href="#grupos">Grupos</a></li>
 							<li><a href="#fechas">Fechas</a></li>
+							<li><a href="{% url 'tournaments:ayuda' %}">Guía de Uso</a></li>
 							<li><a href="/admin/">Acceso Admin</a></li>
 						</ul>
 					</nav>
@@ -106,10 +107,10 @@
 									<span class="image">
 										<img src="{% static 'images/pic05.jpg' %}" alt="" />
 									</span>
-									<a href="generic.html">
-										<h2>Aliquam</h2>
+									<a href="{% url 'tournaments:ayuda' %}">
+										<h2>Guía de Uso</h2>
 										<div class="content">
-											<p>Sed nisl arcu euismod sit amet nisi lorem etiam dolor veroeros et feugiat.</p>
+											<p>Aprende cómo usar el sistema paso a paso.</p>
 										</div>
 									</a>
 								</article>
@@ -117,10 +118,10 @@
 									<span class="image">
 										<img src="{% static 'images/pic06.jpg' %}" alt="" />
 									</span>
-									<a href="generic.html">
-										<h2>Veroeros</h2>
+									<a href="/admin/">
+										<h2>Admin</h2>
 										<div class="content">
-											<p>Sed nisl arcu euismod sit amet nisi lorem etiam dolor veroeros et feugiat.</p>
+											<p>Acceso para la gestión del torneo.</p>
 										</div>
 									</a>
 								</article>

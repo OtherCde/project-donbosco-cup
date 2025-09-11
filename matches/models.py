@@ -19,8 +19,8 @@ class Match(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='scheduled')
     
     class Meta:
-        verbose_name = "Match"
-        verbose_name_plural = "Matches"
+        verbose_name = "Partido"
+        verbose_name_plural = "Partidos"
         ordering = ['date', 'time']
     
     def __str__(self):
@@ -48,8 +48,8 @@ class MatchTeam(models.Model):
     points = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     
     class Meta:
-        verbose_name = "Match Team"
-        verbose_name_plural = "Match Teams"
+        verbose_name = "Equipo en Partido"
+        verbose_name_plural = "Equipos en Partidos"
         unique_together = ['match', 'team']
     
     def __str__(self):

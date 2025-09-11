@@ -65,6 +65,7 @@ LOCAL_APPS = (
     'teams', 
     'matches',
     'events',
+    'project',  # Para la configuración del admin
 )
 
 # Aplicaciones Locales

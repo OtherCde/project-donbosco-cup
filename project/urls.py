@@ -22,15 +22,15 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     # Página principal del torneo
-    path('', include('tournaments.urls')),
+    path('', include('tournaments.urls', namespace='home')),
     # Rutas para TORNEOS
-    path('tournaments/', include('tournaments.urls')),
+    path('tournaments/', include('tournaments.urls', namespace='tournaments')),
     # Rutas para EQUIPOS
-    path('teams/', include('teams.urls')),
+    path('teams/', include('teams.urls', namespace='teams')),
     # Rutas para PARTIDOS
-    path('matches/', include('matches.urls')),
+    path('matches/', include('matches.urls', namespace='matches')),
     # Rutas para EVENTOS
-    path('events/', include('events.urls')),
+    path('events/', include('events.urls', namespace='events')),
 ]
 
 if settings.DEBUG:

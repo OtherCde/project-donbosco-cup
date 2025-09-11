@@ -9,8 +9,8 @@ class Tournament(models.Model):
     end_date = models.DateField()
     
     class Meta:
-        verbose_name = "Tournament"
-        verbose_name_plural = "Tournaments"
+        verbose_name = "Torneo"
+        verbose_name_plural = "Torneos"
         ordering = ['-year', 'name']
     
     def __str__(self):
@@ -25,8 +25,8 @@ class TournamentCategory(models.Model):
     end_date = models.DateField()
     
     class Meta:
-        verbose_name = "Tournament Category"
-        verbose_name_plural = "Tournament Categories"
+        verbose_name = "Categoría del Torneo"
+        verbose_name_plural = "Categorías del Torneo"
         unique_together = ['tournament', 'category_name']
         ordering = ['tournament', 'category_name']
     
@@ -45,8 +45,8 @@ class Phase(models.Model):
     phase_type = models.CharField(max_length=20, choices=TYPE_CHOICES)
     
     class Meta:
-        verbose_name = "Phase"
-        verbose_name_plural = "Phases"
+        verbose_name = "Fase"
+        verbose_name_plural = "Fases"
         ordering = ['tournament_category', 'id']
     
     def __str__(self):
@@ -59,8 +59,8 @@ class Round(models.Model):
     round_number = models.CharField(max_length=20, help_text="e.g., 1, SF, F")
     
     class Meta:
-        verbose_name = "Round"
-        verbose_name_plural = "Rounds"
+        verbose_name = "Ronda"
+        verbose_name_plural = "Rondas"
         ordering = ['phase', 'id']
     
     def __str__(self):

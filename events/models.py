@@ -16,8 +16,8 @@ class MatchEvent(models.Model):
     details = models.TextField(blank=True, null=True, help_text="Additional event details")
     
     class Meta:
-        verbose_name = "Match Event"
-        verbose_name_plural = "Match Events"
+        verbose_name = "Evento del Partido"
+        verbose_name_plural = "Eventos del Partido"
     
     def __str__(self):
         return f"{self.player.full_name} - {self.get_event_type_display()}"
