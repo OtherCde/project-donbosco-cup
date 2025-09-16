@@ -22,3 +22,9 @@ dj-rest-auth==5.0.2
 
 # Django Extensions
 django-extensions==3.2.3
+
+# PostgreSQL
+psycopg2-binary==2.9.10
+
+# Gunicorn
+gunicorn==23.0.0

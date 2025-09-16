@@ -16,6 +16,7 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+from decouple import config
 from django.contrib.messages import constants as messages
 from django.core.exceptions import ImproperlyConfigured
 
@@ -212,7 +213,7 @@ SIMPLE_JWT = {
 }
 
 # Configuración simplificada para el proyecto Don Bosco Cup
-# No necesitamos environ para este proyecto simple
+# Usamos python-decouple para manejar variables de entorno
 
 # settings.py
 ACCOUNT_USERNAME_REQUIRED = False  # No obligar a username

@@ -38,6 +38,22 @@ jobs:
         pip install -r requirements.txt
         pip install black isort flake8 safety bandit
     
+    - name: Setup PostgreSQL
+      run: |
+        sudo systemctl start postgresql
+        sudo -u postgres psql -c "CREATE DATABASE test_db;"
+        sudo -u postgres psql -c "CREATE USER test_user WITH PASSWORD 'test_pass';"
+        sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE test_db TO test_user;"
+    
+    - name: Set Database Environment Variables
+      run: |
+        echo "DB_NAME=test_db" >> $GITHUB_ENV
+        echo "DB_USER=test_user" >> $GITHUB_ENV
+        echo "DB_PASSWORD=test_pass" >> $GITHUB_ENV
+        echo "DB_HOST=localhost" >> $GITHUB_ENV
+        echo "DB_PORT=5432" >> $GITHUB_ENV
+        echo "SECRET_KEY=test-secret-key-for-github-actions" >> $GITHUB_ENV
+    
     - name: Run Django Tests
       run: |
         python manage.py test
