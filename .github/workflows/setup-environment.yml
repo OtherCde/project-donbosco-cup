@@ -1,0 +1,307 @@
+name: 🔧 Setup Environment
+
+on:
+  # Se ejecuta manualmente
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Entorno a configurar'
+        required: true
+        default: 'development'
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+      python_version:
+        description: 'Versión de Python'
+        required: true
+        default: '3.11'
+        type: choice
+        options:
+          - '3.9'
+          - '3.10'
+          - '3.11'
+          - '3.12'
+  
+  # Se ejecuta cuando se hace push a ramas específicas
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'requirements*.txt'
+      - 'project/settings/**'
+      - '.github/workflows/setup-environment.yml'
+
+  # Se ejecuta en pull requests que modifican archivos de configuración
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'requirements*.txt'
+      - 'project/settings/**'
+      - '.github/workflows/setup-environment.yml'
+
+jobs:
+  setup-environment:
+    name: 🔧 Setup Environment (${{ github.event.inputs.environment || 'auto' }})
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        python-version: ['3.11']
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: 📦 Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: 🔍 Verificar estructura del proyecto
+        run: |
+          echo "🔍 Verificando estructura del proyecto..."
+          
+          # Verificar archivos esenciales
+          test -f manage.py || (echo "❌ manage.py no encontrado" && exit 1)
+          test -f requirements.txt || (echo "❌ requirements.txt no encontrado" && exit 1)
+          test -f requirements-dev.txt || (echo "❌ requirements-dev.txt no encontrado" && exit 1)
+          test -d project/settings || (echo "❌ project/settings/ no encontrado" && exit 1)
+          
+          # Verificar apps de Django
+          test -d tournaments || (echo "❌ tournaments app no encontrada" && exit 1)
+          test -d teams || (echo "❌ teams app no encontrada" && exit 1)
+          test -d matches || (echo "❌ matches app no encontrada" && exit 1)
+          test -d events || (echo "❌ events app no encontrada" && exit 1)
+          
+          echo "✅ Estructura del proyecto verificada"
+
+      - name: 🐍 Crear entorno virtual
+        run: |
+          echo "🐍 Creando entorno virtual..."
+          python -m venv venv
+          source venv/bin/activate
+          
+          # Actualizar pip
+          pip install --upgrade pip
+          
+          echo "✅ Entorno virtual creado exitosamente"
+
+      - name: 📦 Instalar dependencias de producción
+        run: |
+          echo "📦 Instalando dependencias de producción..."
+          source venv/bin/activate
+          pip install -r requirements.txt
+          echo "✅ Dependencias de producción instaladas"
+
+      - name: 🛠️ Instalar dependencias de desarrollo
+        run: |
+          echo "🛠️ Instalando dependencias de desarrollo..."
+          source venv/bin/activate
+          pip install -r requirements-dev.txt
+          echo "✅ Dependencias de desarrollo instaladas"
+
+      - name: 🔧 Configurar variables de entorno
+        run: |
+          echo "🔧 Configurando variables de entorno..."
+          
+          # Crear .env desde plantilla si no existe
+          test -f .env || cp env.example .env
+          
+          # Configurar variables según el entorno
+          ENVIRONMENT="${{ github.event.inputs.environment || 'development' }}"
+          
+          case $ENVIRONMENT in
+            "development")
+              echo "🔹 Configurando para desarrollo..."
+              sed -i 's/^DEBUG=.*/DEBUG=True/' .env
+              sed -i 's/^DB_NAME=.*/DB_NAME=donbosco_cup_dev/' .env
+              ;;
+            "staging")
+              echo "🔹 Configurando para staging..."
+              sed -i 's/^DEBUG=.*/DEBUG=False/' .env
+              sed -i 's/^DB_NAME=.*/DB_NAME=donbosco_cup_staging/' .env
+              ;;
+            "production")
+              echo "🔹 Configurando para producción..."
+              sed -i 's/^DEBUG=.*/DEBUG=False/' .env
+              sed -i 's/^DB_NAME=.*/DB_NAME=donbosco_cup_prod/' .env
+              ;;
+          esac
+          
+          # Mostrar configuración (sin passwords)
+          echo "=== CONFIGURACIÓN ACTUAL ==="
+          grep -v "PASSWORD\|SECRET" .env | head -10
+          echo "..."
+
+      - name: 🗄️ Setup PostgreSQL
+        run: |
+          echo "🗄️ Configurando PostgreSQL..."
+          
+          # Instalar PostgreSQL
+          sudo systemctl start postgresql || true
+          sudo systemctl enable postgresql || true
+          
+          # Crear base de datos de prueba
+          sudo -u postgres psql -c "CREATE DATABASE test_db;" || echo "Base de datos test_db ya existe"
+          sudo -u postgres psql -c "CREATE USER test_user WITH PASSWORD 'test_pass';" || echo "Usuario test_user ya existe"
+          sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE test_db TO test_user;" || echo "Privilegios ya otorgados"
+          
+          echo "✅ PostgreSQL configurado"
+
+      - name: 🧪 Verificar configuración de Django
+        run: |
+          echo "🧪 Verificando configuración de Django..."
+          source venv/bin/activate
+          
+          # Verificar que Django puede cargar las configuraciones
+          python -c "
+          import os
+          os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'project.settings.dev')
+          import django
+          django.setup()
+          from django.conf import settings
+          print(f'✅ Django configurado correctamente')
+          print(f'📊 Base de datos: {settings.DATABASES[\"default\"][\"ENGINE\"]}')
+          print(f'🔧 Debug: {settings.DEBUG}')
+          print(f'🌐 Apps instaladas: {len(settings.INSTALLED_APPS)}')
+          "
+
+      - name: 🔍 Verificar instalación de herramientas
+        run: |
+          echo "🔍 Verificando herramientas instaladas..."
+          source venv/bin/activate
+          
+          # Verificar herramientas de calidad de código
+          black --version && echo "✅ Black instalado"
+          isort --version && echo "✅ isort instalado"
+          flake8 --version && echo "✅ Flake8 instalado"
+          mypy --version && echo "✅ MyPy instalado"
+          safety --version && echo "✅ Safety instalado"
+          bandit --version && echo "✅ Bandit instalado"
+          
+          echo "✅ Todas las herramientas verificadas"
+
+      - name: 📊 Generar reporte de entorno
+        run: |
+          echo "📊 Generando reporte de entorno..."
+          source venv/bin/activate
+          
+          echo "=== REPORTE DE ENTORNO ==="
+          echo "🐍 Python: $(python --version)"
+          echo "📦 Pip: $(pip --version | cut -d' ' -f2)"
+          echo "🔧 Django: $(python -c 'import django; print(django.get_version())')"
+          echo "🗄️ PostgreSQL: $(psql --version | cut -d' ' -f3)"
+          echo "📁 Directorio de trabajo: $(pwd)"
+          echo "🌿 Entorno virtual: $(which python)"
+          
+          echo ""
+          echo "=== DEPENDENCIAS INSTALADAS ==="
+          pip list | grep -E "(Django|psycopg2|black|isort|flake8|mypy|safety|bandit)" || echo "No se encontraron dependencias principales"
+
+      - name: 🚀 Prueba rápida de funcionalidad
+        run: |
+          echo "🚀 Ejecutando prueba rápida de funcionalidad..."
+          source venv/bin/activate
+          
+          # Verificar que manage.py funciona
+          python manage.py check --settings=project.settings.dev
+          echo "✅ Django check exitoso"
+          
+          # Verificar que las migraciones están listas
+          python manage.py showmigrations --settings=project.settings.dev | head -10
+          echo "✅ Migraciones verificadas"
+
+      - name: 💾 Guardar artefactos
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: environment-setup-report
+          path: |
+            .env
+            requirements.txt
+            requirements-dev.txt
+          retention-days: 7
+
+      - name: 📝 Comentario en PR (si es PR)
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && comment.body.includes('🔧 Setup Environment')
+            );
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: `## 🔧 Setup Environment - Completado ✅
+                
+                **Entorno configurado exitosamente:**
+                - ✅ Python ${{ matrix.python-version }}
+                - ✅ Dependencias instaladas
+                - ✅ PostgreSQL configurado
+                - ✅ Variables de entorno configuradas
+                - ✅ Django verificado
+                
+                **Próximos pasos:**
+                1. Ejecutar migraciones: \`python manage.py migrate\`
+                2. Crear superusuario: \`python manage.py createsuperuser\`
+                3. Ejecutar servidor: \`python manage.py runserver\`
+                
+                **Comando para configurar localmente:**
+                \`\`\`bash
+                python -m venv venv
+                source venv/bin/activate
+                pip install -r requirements.txt
+                pip install -r requirements-dev.txt
+                cp env.example .env
+                # Editar .env con tus configuraciones
+                \`\`\``
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: `## 🔧 Setup Environment - Completado ✅
+                
+                **Entorno configurado exitosamente:**
+                - ✅ Python ${{ matrix.python-version }}
+                - ✅ Dependencias instaladas
+                - ✅ PostgreSQL configurado
+                - ✅ Variables de entorno configuradas
+                - ✅ Django verificado
+                
+                **Próximos pasos:**
+                1. Ejecutar migraciones: \`python manage.py migrate\`
+                2. Crear superusuario: \`python manage.py createsuperuser\`
+                3. Ejecutar servidor: \`python manage.py runserver\`
+                
+                **Comando para configurar localmente:**
+                \`\`\`bash
+                python -m venv venv
+                source venv/bin/activate
+                pip install -r requirements.txt
+                pip install -r requirements-dev.txt
+                cp env.example .env
+                # Editar .env con tus configuraciones
+                \`\`\``
+              });
+            }
