@@ -14,23 +14,24 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import path, include
+
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib import admin
+from django.urls import include, path
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path("admin/", admin.site.urls),
     # Página principal del torneo
-    path('', include('tournaments.urls', namespace='home')),
+    path("", include("tournaments.urls", namespace="home")),
     # Rutas para TORNEOS
-    path('tournaments/', include('tournaments.urls', namespace='tournaments')),
+    path("tournaments/", include("tournaments.urls", namespace="tournaments")),
     # Rutas para EQUIPOS
-    path('teams/', include('teams.urls', namespace='teams')),
+    path("teams/", include("teams.urls", namespace="teams")),
     # Rutas para PARTIDOS
-    path('matches/', include('matches.urls', namespace='matches')),
+    path("matches/", include("matches.urls", namespace="matches")),
     # Rutas para EVENTOS
-    path('events/', include('events.urls', namespace='events')),
+    path("events/", include("events.urls", namespace="events")),
 ]
 
 if settings.DEBUG:

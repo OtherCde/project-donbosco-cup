@@ -1,7 +1,8 @@
 from django.urls import path
+
 from . import views
 
-app_name = 'events'
+app_name = "events"
 
 urlpatterns = [
     # Aquí se agregarán las rutas específicas de events

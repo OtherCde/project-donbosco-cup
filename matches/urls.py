@@ -1,7 +1,8 @@
 from django.urls import path
+
 from . import views
 
-app_name = 'matches'
+app_name = "matches"
 
 urlpatterns = [
     # Aquí se agregarán las rutas específicas de matches

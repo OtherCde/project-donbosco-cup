@@ -1,12 +1,13 @@
 from django.contrib import admin
 from django.contrib.admin import AdminSite
+from django.db.models import Count
 from django.shortcuts import render
 from django.urls import path
-from django.db.models import Count
-from tournaments.models import Tournament, TournamentCategory
-from teams.models import Team, Player
-from matches.models import Match
+
 from events.models import MatchEvent
+from matches.models import Match
+from teams.models import Player, Team
+from tournaments.models import Tournament, TournamentCategory
 
 
 def admin_dashboard_view(request):
@@ -15,43 +16,44 @@ def admin_dashboard_view(request):
     """
     # Estadísticas básicas
     stats = {
-        'tournaments': Tournament.objects.count(),
-        'categories': TournamentCategory.objects.count(),
-        'teams': Team.objects.count(),
-        'players': Player.objects.count(),
-        'matches': Match.objects.count(),
-        'events': MatchEvent.objects.count(),
+        "tournaments": Tournament.objects.count(),
+        "categories": TournamentCategory.objects.count(),
+        "teams": Team.objects.count(),
+        "players": Player.objects.count(),
+        "matches": Match.objects.count(),
+        "events": MatchEvent.objects.count(),
     }
-    
+
     # Torneo más reciente
-    latest_tournament = Tournament.objects.order_by('-year').first()
-    
+    latest_tournament = Tournament.objects.order_by("-year").first()
+
     context = {
-        'stats': stats,
-        'latest_tournament': latest_tournament,
+        "stats": stats,
+        "latest_tournament": latest_tournament,
     }
-    
-    return render(request, 'admin/dashboard.html', context)
+
+    return render(request, "admin/dashboard.html", context)
 
 
 class CopaDonBoscoAdminSite(AdminSite):
     """
     Admin personalizado con dashboard de bienvenida
     """
+
     site_header = "Copa Don Bosco 2024 - Administración"
     site_title = "Copa Don Bosco"
     index_title = "Panel de Administración"
-    
+
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
-            path('', admin_dashboard_view, name='index'),
+            path("", admin_dashboard_view, name="index"),
         ]
         return custom_urls + urls
 
 
 # Crear instancia personalizada
-admin_site = CopaDonBoscoAdminSite(name='copa_admin')
+admin_site = CopaDonBoscoAdminSite(name="copa_admin")
 
 # Configuración del Admin estándar en Español
 admin.site.site_header = "Copa Don Bosco 2024 - Administración"
