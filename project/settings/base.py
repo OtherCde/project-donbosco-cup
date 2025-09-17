@@ -17,6 +17,7 @@ from datetime import timedelta
 from pathlib import Path
 
 from decouple import config
+
 from django.contrib.messages import constants as messages
 from django.core.exceptions import ImproperlyConfigured
 
