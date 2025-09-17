@@ -1,0 +1,108 @@
+name: 🔧 Generate Production .env
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Entorno para generar .env'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+
+jobs:
+  generate-env:
+    name: 🔧 Generate .env for ${{ github.event.inputs.environment }}
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🔧 Generate .env file
+        run: |
+          echo "🔧 Generando archivo .env para ${{ github.event.inputs.environment }}..."
+          
+          # Crear .env desde plantilla
+          cp env.example .env
+          
+          ENVIRONMENT="${{ github.event.inputs.environment }}"
+          
+          case $ENVIRONMENT in
+            "development")
+              echo "🔹 Configurando para desarrollo..."
+              sed -i 's/^DEBUG=.*/DEBUG=True/' .env
+              sed -i 's/^DB_NAME=.*/DB_NAME=donbosco_cup_dev/' .env
+              sed -i 's/^SESSION_COOKIE_SECURE=.*/SESSION_COOKIE_SECURE=False/' .env
+              sed -i 's/^CSRF_COOKIE_SECURE=.*/CSRF_COOKIE_SECURE=False/' .env
+              sed -i 's/^SECURE_SSL_REDIRECT=.*/SECURE_SSL_REDIRECT=False/' .env
+              ;;
+            "staging")
+              echo "🔹 Configurando para staging..."
+              sed -i 's/^DEBUG=.*/DEBUG=False/' .env
+              sed -i 's/^DB_NAME=.*/DB_NAME=donbosco_cup_staging/' .env
+              sed -i 's/^SESSION_COOKIE_SECURE=.*/SESSION_COOKIE_SECURE=True/' .env
+              sed -i 's/^CSRF_COOKIE_SECURE=.*/CSRF_COOKIE_SECURE=True/' .env
+              sed -i 's/^SECURE_SSL_REDIRECT=.*/SECURE_SSL_REDIRECT=True/' .env
+              ;;
+            "production")
+              echo "🔹 Configurando para producción..."
+              sed -i 's/^DEBUG=.*/DEBUG=False/' .env
+              sed -i 's/^DB_NAME=.*/DB_NAME=donbosco_cup_prod/' .env
+              sed -i 's/^SESSION_COOKIE_SECURE=.*/SESSION_COOKIE_SECURE=True/' .env
+              sed -i 's/^CSRF_COOKIE_SECURE=.*/CSRF_COOKIE_SECURE=True/' .env
+              sed -i 's/^SECURE_SSL_REDIRECT=.*/SECURE_SSL_REDIRECT=True/' .env
+              ;;
+          esac
+          
+          echo "✅ Archivo .env generado para $ENVIRONMENT"
+
+      - name: 📋 Mostrar contenido del .env
+        run: |
+          echo "=== ARCHIVO .env GENERADO PARA ${{ github.event.inputs.environment }} ==="
+          echo ""
+          echo "📄 Contenido completo (SIN PASSWORDS):"
+          echo "=========================================="
+          
+          # Mostrar el archivo completo pero ocultar passwords y secrets
+          sed 's/\(PASSWORD\|SECRET\)=.*/\1=***OCULTO***/' .env
+          
+          echo ""
+          echo "=========================================="
+          echo "📊 Estadísticas:"
+          echo "- Total de líneas: $(wc -l < .env)"
+          echo "- Variables configuradas: $(grep -c '=' .env)"
+          echo "- Variables sensibles: $(grep -c 'PASSWORD\|SECRET' .env)"
+
+      - name: 💾 Guardar .env como artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: env-file-${{ github.event.inputs.environment }}
+          path: .env
+          retention-days: 30
+
+      - name: 📝 Crear comentario con instrucciones
+        run: |
+          echo "## 🔧 Archivo .env generado para ${{ github.event.inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📋 Variables principales configuradas:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          
+          # Agregar variables principales al summary
+          grep -E '^(DEBUG|DB_NAME|DB_HOST|DB_PORT|ALLOWED_HOSTS|CORS_|SESSION_COOKIE_SECURE|CSRF_COOKIE_SECURE|SECURE_SSL_REDIRECT)' .env >> $GITHUB_STEP_SUMMARY || echo "# No se encontraron variables principales" >> $GITHUB_STEP_SUMMARY
+          
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔐 Variables que necesitas configurar manualmente:" >> $GITHUB_STEP_SUMMARY
+          echo "- \`SECRET_KEY\`: Generar una clave segura" >> $GITHUB_STEP_SUMMARY
+          echo "- \`DB_PASSWORD\`: Contraseña de la base de datos" >> $GITHUB_STEP_SUMMARY
+          echo "- \`EMAIL_HOST_PASSWORD\`: Contraseña del servicio de email (opcional)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📥 Descarga el archivo:" >> $GITHUB_STEP_SUMMARY
+          echo "1. Ve a la sección **Artifacts** de este workflow" >> $GITHUB_STEP_SUMMARY
+          echo "2. Descarga \`env-file-${{ github.event.inputs.environment }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "3. Renómbralo a \`.env\` en tu servidor" >> $GITHUB_STEP_SUMMARY
+          echo "4. Configura las variables sensibles manualmente" >> $GITHUB_STEP_SUMMARY

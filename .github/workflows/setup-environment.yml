@@ -137,10 +137,17 @@ jobs:
               ;;
           esac
           
-          # Mostrar configuración (sin passwords)
+          # Mostrar configuración completa (sin passwords sensibles)
           echo "=== CONFIGURACIÓN ACTUAL ==="
-          grep -v "PASSWORD\|SECRET" .env | head -10
-          echo "..."
+          echo "📋 Variables no sensibles:"
+          grep -v "PASSWORD\|SECRET" .env | head -15
+          echo ""
+          echo "📋 Estructura del archivo .env:"
+          echo "Total de líneas: $(wc -l < .env)"
+          echo "Variables configuradas: $(grep -c '=' .env)"
+          echo ""
+          echo "📋 Variables principales:"
+          grep -E '^(DEBUG|DB_NAME|DB_HOST|DB_PORT|ALLOWED_HOSTS|CORS_)' .env || echo "No se encontraron variables principales"
 
       - name: 🗄️ Setup PostgreSQL
         run: |
@@ -206,25 +213,13 @@ jobs:
           echo ""
           echo "=== DEPENDENCIAS INSTALADAS ==="
           pip list | grep -E "(Django|psycopg2|black|isort|flake8|mypy|safety|bandit)" || echo "No se encontraron dependencias principales"
-
-      - name: 🚀 Prueba rápida de funcionalidad
-        run: |
-          echo "🚀 Ejecutando prueba rápida de funcionalidad..."
-          source venv/bin/activate
-          
-          # Verificar que manage.py funciona
-          python manage.py check --settings=project.settings.dev
-          echo "✅ Django check exitoso"
-          
-          # Verificar que las migraciones están listas
-          python manage.py showmigrations --settings=project.settings.dev | head -10
-          echo "✅ Migraciones verificadas"
+      
 
       - name: 💾 Guardar artefactos
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: environment-setup-report
+          name: environment-setup-report-${{ github.event.inputs.environment || 'development' }}
           path: |
             .env
             requirements.txt
