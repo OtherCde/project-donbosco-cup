@@ -4,23 +4,23 @@ from decouple import config
 # Configuración de producción
 DEBUG = False
 ALLOWED_HOSTS = config(
-    "ALLOWED_HOSTS", 
+    "ALLOWED_HOSTS",
     default="localhost,127.0.0.1",
-    cast=lambda v: [s.strip() for s in v.split(",")]
+    cast=lambda v: [s.strip() for s in v.split(",")],
 )
 
 # Orígenes confiables para CSRF
 CSRF_TRUSTED_ORIGINS = config(
     "CSRF_TRUSTED_ORIGINS",
     default="http://localhost,http://127.0.0.1",
-    cast=lambda v: [s.strip() for s in v.split(",")]
+    cast=lambda v: [s.strip() for s in v.split(",")],
 )
 
 # CORS: permitir sólo el frontend
 CORS_ALLOWED_ORIGINS = config(
     "CORS_ALLOWED_ORIGINS",
     default="http://localhost:3000,http://127.0.0.1:3000",
-    cast=lambda v: [s.strip() for s in v.split(",")]
+    cast=lambda v: [s.strip() for s in v.split(",")],
 )
 
 # Cookies seguras en producción
@@ -67,6 +67,13 @@ EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="")
 
 # Logging para producción
+import os
+
+# Crear directorio de logs si no existe
+LOG_DIR = config("LOG_DIR", default="/var/log/django")
+LOG_FILE = config("LOG_FILE", default="donbosco_cup.log")
+
+# Configuración flexible de logging
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -75,22 +82,34 @@ LOGGING = {
             "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
             "style": "{",
         },
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
+        },
     },
     "handlers": {
-        "file": {
-            "level": "INFO",
-            "class": "logging.FileHandler",
-            "filename": "/var/log/django/donbosco_cup.log",
-            "formatter": "verbose",
-        },
         "console": {
-            "level": "ERROR",
+            "level": "INFO",
             "class": "logging.StreamHandler",
             "formatter": "verbose",
         },
     },
     "root": {
-        "handlers": ["file", "console"],
+        "handlers": ["console"],
         "level": "INFO",
     },
 }
+
+# Agregar handler de archivo solo si el directorio existe o se puede crear
+try:
+    os.makedirs(LOG_DIR, exist_ok=True)
+    LOGGING["handlers"]["file"] = {
+        "level": "INFO",
+        "class": "logging.FileHandler",
+        "filename": os.path.join(LOG_DIR, LOG_FILE),
+        "formatter": "verbose",
+    }
+    LOGGING["root"]["handlers"].append("file")
+except (OSError, PermissionError):
+    # Si no se puede crear el directorio o archivo, solo usar console
+    pass

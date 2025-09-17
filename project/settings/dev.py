@@ -19,8 +19,8 @@ DATABASES = {
 
 # SECRET_KEY para desarrollo
 SECRET_KEY = config(
-    "SECRET_KEY", 
-    default="django-insecure-dev-key-donbosco-cup-2024-change-in-production"
+    "SECRET_KEY",
+    default="django-insecure-dev-key-donbosco-cup-2024-change-in-production",
 )
 
 # Configuración adicional para desarrollo

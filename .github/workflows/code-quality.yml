@@ -75,9 +75,25 @@ jobs:
         pip install -r requirements.txt
         pip install coverage pytest-cov
     
+    - name: Setup PostgreSQL for Tests
+      run: |
+        sudo systemctl start postgresql
+        sudo -u postgres psql -c "CREATE DATABASE test_db;" || echo "Database already exists"
+        sudo -u postgres psql -c "CREATE USER test_user WITH PASSWORD 'test_pass';" || echo "User already exists"
+        sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE test_db TO test_user;" || echo "Privileges already granted"
+    
+    - name: Set Test Environment Variables
+      run: |
+        echo "DB_NAME=test_db" >> $GITHUB_ENV
+        echo "DB_USER=test_user" >> $GITHUB_ENV
+        echo "DB_PASSWORD=test_pass" >> $GITHUB_ENV
+        echo "DB_HOST=localhost" >> $GITHUB_ENV
+        echo "DB_PORT=5432" >> $GITHUB_ENV
+        echo "SECRET_KEY=test-secret-key-for-github-actions" >> $GITHUB_ENV
+    
     - name: Run Tests with Coverage
       run: |
-        coverage run --source='.' manage.py test
+        coverage run --source='.' manage.py test --settings=project.settings.dev
         coverage report -m
         coverage xml
     
