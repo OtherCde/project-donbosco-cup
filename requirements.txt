@@ -23,6 +23,9 @@ dj-rest-auth==5.0.2
 # Django Extensions
 django-extensions==3.2.3
 
+# Excel files support
+openpyxl==3.1.5
+
 # PostgreSQL
 psycopg2-binary==2.9.10
 

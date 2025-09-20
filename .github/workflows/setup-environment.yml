@@ -133,7 +133,7 @@ jobs:
             "production")
               echo "🔹 Configurando para producción..."
               sed -i 's/^DEBUG=.*/DEBUG=False/' .env
-              sed -i 's/^DB_NAME=.*/DB_NAME=donbosco_cup_prod/' .env
+              sed -i 's/^DB_NAME=.*/DB_NAME=db_donbosco/' .env
               ;;
           esac
           
