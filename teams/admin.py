@@ -24,9 +24,10 @@ Notas:
 """
 
 from django.contrib import admin
-from django.urls import path
 from django.shortcuts import redirect
+from django.urls import path
 from django.utils.html import format_html
+
 from .models import Player, Team
 from .views import upload_players_from_excel
 

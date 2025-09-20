@@ -1,13 +1,14 @@
-from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.exceptions import ValidationError
+from django.shortcuts import redirect, render
+
 from .forms import ExcelPlayerUploadForm
 from .models import Player
 from .utils import (
-    extract_players_from_excel,
-    auto_assign_jersey_numbers,
     auto_assign_dni,
+    auto_assign_jersey_numbers,
+    extract_players_from_excel,
 )
 
 

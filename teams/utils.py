@@ -1,7 +1,8 @@
-import openpyxl
-from datetime import datetime, date
-from django.core.exceptions import ValidationError
 import re
+from datetime import date, datetime
+
+import openpyxl
+from django.core.exceptions import ValidationError
 
 
 def extract_players_from_excel(
