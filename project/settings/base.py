@@ -17,7 +17,6 @@ from datetime import timedelta
 from pathlib import Path
 
 from decouple import config
-
 from django.contrib.messages import constants as messages
 from django.core.exceptions import ImproperlyConfigured
 
@@ -38,6 +37,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # SECRET_KEY = *********
+
+# Configuración básica leída desde .env
+SECRET_KEY = config("SECRET_KEY")
+DEBUG = config("DEBUG", default=True, cast=bool)
+ALLOWED_HOSTS = config(
+    "ALLOWED_HOSTS",
+    default="localhost,127.0.0.1",
+    cast=lambda v: [s.strip() for s in v.split(",")],
+)
 
 # Application definition
 
@@ -177,29 +185,31 @@ REST_FRAMEWORK = {
     ),
 }
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://brava.okarol.com",
-    "http://127.0.0.1",
-    "http://localhost",
-    "http://localhost:5174",
-]
-
-# Configuración de CORS
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # Permitir peticiones desde React
-    "http://127.0.0.1:3000",
-    "http://localhost:5174",
-]
+# Configuración de CORS - leída desde .env
+CORS_ALLOWED_ORIGINS = config(
+    "CORS_ALLOWED_ORIGINS",
+    default="http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://localhost:5174",
+    cast=lambda v: [s.strip() for s in v.split(",")],
+)
 
 # Si quieres permitir todas las solicitudes desde cualquier origen (no recomendado en producción)
 # CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_CREDENTIALS = True  # Permitir que se envíen cookies y autenticación
 
+# Configuración de CSRF - leída desde .env
+CSRF_TRUSTED_ORIGINS = config(
+    "CSRF_TRUSTED_ORIGINS",
+    default="http://localhost,http://127.0.0.1,http://localhost:3000,http://localhost:5173,http://localhost:5174",
+    cast=lambda v: [s.strip() for s in v.split(",")],
+)
+
 # Para PERMITIR LA CONFIGURACION DE LOS USUARIOS
 SESSION_ENGINE = "django.contrib.sessions.backends.db"  # Usa la base de datos para almacenar sesiones
 SESSION_COOKIE_HTTPONLY = True  # Protege la cookie de sesión
-SESSION_COOKIE_SECURE = False  # Cambia a True en producción con HTTPS
+SESSION_COOKIE_SECURE = config(
+    "SESSION_COOKIE_SECURE", default=False, cast=bool
+)  # Leído desde .env
 SESSION_EXPIRE_AT_BROWSER_CLOSE = (
     False  # Permite que la sesión persista después de cerrar el navegador
 )

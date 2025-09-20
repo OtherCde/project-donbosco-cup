@@ -3,33 +3,14 @@ from decouple import config
 from .base import *
 
 # Configuración de producción
-DEBUG = False
-ALLOWED_HOSTS = config(
-    "ALLOWED_HOSTS",
-    default="localhost,127.0.0.1",
-    cast=lambda v: [s.strip() for s in v.split(",")],
-)
+# DEBUG ya se lee desde base.py, pero podemos sobrescribir si es necesario
+# DEBUG = config("DEBUG", default=False, cast=bool)
 
-# Orígenes confiables para CSRF
-CSRF_TRUSTED_ORIGINS = config(
-    "CSRF_TRUSTED_ORIGINS",
-    default="http://localhost,http://127.0.0.1",
-    cast=lambda v: [s.strip() for s in v.split(",")],
-)
-
-# CORS: permitir sólo el frontend
-CORS_ALLOWED_ORIGINS = config(
-    "CORS_ALLOWED_ORIGINS",
-    default="http://localhost:3000,http://127.0.0.1:3000",
-    cast=lambda v: [s.strip() for s in v.split(",")],
-)
-
-# Cookies seguras en producción
-SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", default=True, cast=bool)
-CSRF_COOKIE_SECURE = config("CSRF_COOKIE_SECURE", default=True, cast=bool)
+# Las siguientes variables ya se leen desde base.py desde el .env:
+# ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS, CORS_ALLOWED_ORIGINS
+# SESSION_COOKIE_SECURE, CSRF_COOKIE_SECURE, SECURE_SSL_REDIRECT
 
 # Redirección a HTTPS detrás de proxy/Nginx
-SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", default=True, cast=bool)
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Base de datos PostgreSQL para producción
@@ -47,8 +28,8 @@ DATABASES = {
     }
 }
 
-# SECRET_KEY para producción (OBLIGATORIO)
-SECRET_KEY = config("SECRET_KEY")
+# SECRET_KEY para producción - ya se lee desde base.py
+# SECRET_KEY ya está configurado en base.py desde el .env
 
 # Configuración de seguridad adicional
 SECURE_BROWSER_XSS_FILTER = True

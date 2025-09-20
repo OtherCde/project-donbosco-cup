@@ -24,9 +24,10 @@ Notas:
 """
 
 from django.contrib import admin
-from django.urls import path
 from django.shortcuts import redirect
+from django.urls import path
 from django.utils.html import format_html
+
 from .models import Player, Team
 from .views import upload_players_from_excel
 
@@ -77,7 +78,13 @@ class TeamAdmin(admin.ModelAdmin):
     Nota: Cada equipo representa una promoción específica
     """
 
-    list_display = ["name", "abbreviation", "tournament_category", "player_count", "upload_players_link"]
+    list_display = [
+        "name",
+        "abbreviation",
+        "tournament_category",
+        "player_count",
+        "upload_players_link",
+    ]
     list_filter = ["tournament_category__tournament", "tournament_category"]
     search_fields = ["name", "abbreviation"]
     ordering = ["tournament_category", "name"]
@@ -90,18 +97,24 @@ class TeamAdmin(admin.ModelAdmin):
         ),
         ("Visual", {"fields": ("logo_url",), "classes": ("collapse",)}),
     )
+
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
-            path('upload-players/', upload_players_from_excel, name='upload_players_from_excel'),
+            path(
+                "upload-players/",
+                upload_players_from_excel,
+                name="upload_players_from_excel",
+            ),
         ]
         return custom_urls + urls
-    
+
     def upload_players_link(self, obj):
         return format_html(
             '<a href="/admin/teams/team/upload-players/" class="button">Cargar desde Excel</a>'
         )
-    upload_players_link.short_description = 'Acciones'
+
+    upload_players_link.short_description = "Acciones"
 
     def player_count(self, obj):
         """Cuenta automáticamente el número de jugadores del equipo"""
