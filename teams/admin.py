@@ -38,7 +38,6 @@ class PlayerInline(admin.TabularInline):
     Permite agregar jugadores sin salir de la vista del equipo.
     Campos ordenados por número de camiseta.
     """
-
     model = Player
     extra = 1
     fields = [
@@ -48,6 +47,9 @@ class PlayerInline(admin.TabularInline):
         "position",
         "dni",
         "birth_date",
+        "telefono",
+        "promo",
+        "oficio",
     ]
     ordering = ["jersey_number"]
 
@@ -122,6 +124,9 @@ class PlayerAdmin(admin.ModelAdmin):
     - team: Equipo al que pertenece
     - jersey_number: Número de camiseta
     - position: Posición en el campo
+    - telefono: Número de teléfono (opcional)
+    - promo: Año de la promoción (opcional)
+    - oficio: Oficio o profesión (opcional)
 
     Funcionalidades:
     - Cálculo automático de edad
@@ -133,25 +138,49 @@ class PlayerAdmin(admin.ModelAdmin):
     - DNI: 7 u 8 dígitos
     - Número de camiseta: único por equipo
     - DNI: único por equipo
+
+    Nota: Los campos 'telefono', 'promo' y 'oficio' son opcionales y pueden ser utilizados para almacenar información adicional sobre el jugador.
     """
 
-    list_display = ["full_name", "jersey_number", "team", "position", "age"]
-    list_filter = ["position", "team__tournament_category", "team"]
-    search_fields = ["first_name", "last_name", "dni", "jersey_number"]
+    list_display = [
+        "full_name",
+        "jersey_number",
+        "team",
+        "position",
+        "age",
+        "telefono",
+        "promo",
+        "oficio",
+    ]
+    list_filter = [
+        "position",
+        "team__tournament_category",
+        "team",
+        "promo",  # permite filtrar por promoción
+        "oficio", # filtra por profesión
+    ]
+    search_fields = [
+        "first_name",
+        "last_name",
+        "dni",
+        "jersey_number",
+        "telefono",
+        "oficio",
+    ]
     ordering = ["team", "jersey_number"]
 
     fieldsets = (
         (
             "Información Personal",
-            {"fields": ("first_name", "last_name", "birth_date", "dni")},
+            {"fields": ("first_name", "last_name", "birth_date", "dni", "telefono", "oficio")},
         ),
+        ("Promoción", {"fields": ("promo",)}),
         ("Información del Equipo", {"fields": ("team", "jersey_number", "position")}),
     )
 
     def age(self, obj):
         """Calcula automáticamente la edad del jugador"""
         from datetime import date
-
         today = date.today()
         return (
             today.year

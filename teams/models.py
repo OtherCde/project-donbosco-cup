@@ -44,6 +44,18 @@ class Player(models.Model):
             RegexValidator(regex=r"^\d{7,8}$", message="DNI must have 7 or 8 digits")
         ],
     )
+    telefono = models.CharField(max_length=20, null=True, blank=True)
+    promo = models.PositiveIntegerField(
+        help_text="Año de la promoción a la que perteneció (ej. 1987, 2015)", 
+        null=True, 
+        blank=True
+    )
+    oficio = models.CharField(
+        max_length=100, 
+        null=True, 
+        blank=True, 
+        help_text="Oficio o profesión (Ej: Ingeniero, Lic. Trabajo Social)"
+    )
 
     class Meta:
         verbose_name = "Jugador"

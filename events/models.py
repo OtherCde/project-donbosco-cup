@@ -1,5 +1,4 @@
 from django.db import models
-
 from matches.models import MatchTeam
 from teams.models import Player
 

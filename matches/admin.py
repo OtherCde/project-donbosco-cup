@@ -23,10 +23,61 @@ Notas:
 - Los puntos se asignan según el resultado
 """
 
+from django import forms
 from django.contrib import admin
 from django.utils.html import format_html
-
+from teams.models import Player
+from events.models import MatchEvent
 from .models import Match, MatchTeam
+# admin.py for events app
+
+class MatchEventInlineForm(forms.ModelForm):
+    """
+    Formulario personalizado para el inline de MatchEvent
+    Filtra los jugadores según el equipo del MatchTeam padre.
+    El campo 'player' solo muestra jugadores del equipo correspondiente.
+    """
+    
+    class Meta:
+        model = MatchEvent
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        parent_obj = kwargs.pop("parent_obj", None)  # 🔑 viene del inline
+        super().__init__(*args, **kwargs)
+
+        if parent_obj:  # siempre usamos el team del MatchTeam padre
+            team = parent_obj.team
+            self.fields["player"].queryset = Player.objects.filter(team=team)
+        else:
+            self.fields["player"].queryset = Player.objects.none()
+
+
+class MatchEventInline(admin.TabularInline):
+    """
+    Inline para gestionar eventos del partido (goles, tarjetas)
+    Permite agregar eventos directamente desde el equipo en el partido.
+    Filtra los jugadores según el equipo del MatchTeam padre.
+    """
+    
+    model = MatchEvent
+    form = MatchEventInlineForm
+    extra = 1
+    fields = ["player", "event_type", "details"]
+
+    def get_formset(self, request, obj=None, **kwargs):
+        """
+        Pasamos el objeto padre (MatchTeam) a todos los formularios del inline.
+        """
+        FormSet = super().get_formset(request, obj, **kwargs)
+
+        class CustomFormSet(FormSet):
+            def _construct_form(self, i, **kwargs):
+                kwargs["parent_obj"] = obj  # 🔑 siempre el MatchTeam padre
+                return super()._construct_form(i, **kwargs)
+
+        return CustomFormSet
+
 
 
 class MatchTeamInline(admin.TabularInline):
@@ -130,12 +181,17 @@ class MatchTeamAdmin(admin.ModelAdmin):
     - win: Victoria (3 puntos)
     - loss: Derrota (0 puntos)
     - draw: Empate (1 punto)
+    
+    Gestión de eventos del partido (goles, tarjetas) mediante inline
+    - Inline para gestionar eventos del partido (goles, tarjetas)
+    
     """
 
     list_display = ["team", "match_info", "goals", "penalty_goals", "result", "points"]
     list_filter = ["result", "match__status", "team__tournament_category"]
     search_fields = ["team__name", "match__round__round_name"]
     ordering = ["match__date", "match__time"]
+    inlines = [MatchEventInline]
 
     fieldsets = (
         ("Información del Partido", {"fields": ("match", "team")}),
@@ -147,3 +203,5 @@ class MatchTeamAdmin(admin.ModelAdmin):
         return f"{obj.match.date} - {obj.match.round.round_name}"
 
     match_info.short_description = "Info del Partido"
+
+
