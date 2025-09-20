@@ -109,46 +109,6 @@ jobs:
           pip install -r requirements-dev.txt
           echo "✅ Dependencias de desarrollo instaladas"
 
-      - name: 🔧 Configurar variables de entorno
-        run: |
-          echo "🔧 Configurando variables de entorno..."
-          
-          # Crear .env desde plantilla si no existe
-          test -f .env || cp env.example .env
-          
-          # Configurar variables según el entorno
-          ENVIRONMENT="${{ github.event.inputs.environment || 'development' }}"
-          
-          case $ENVIRONMENT in
-            "development")
-              echo "🔹 Configurando para desarrollo..."
-              sed -i 's/^DEBUG=.*/DEBUG=True/' .env
-              sed -i 's/^DB_NAME=.*/DB_NAME=donbosco_cup_dev/' .env
-              ;;
-            "staging")
-              echo "🔹 Configurando para staging..."
-              sed -i 's/^DEBUG=.*/DEBUG=False/' .env
-              sed -i 's/^DB_NAME=.*/DB_NAME=donbosco_cup_staging/' .env
-              ;;
-            "production")
-              echo "🔹 Configurando para producción..."
-              sed -i 's/^DEBUG=.*/DEBUG=False/' .env
-              sed -i 's/^DB_NAME=.*/DB_NAME=db_donbosco/' .env
-              ;;
-          esac
-          
-          # Mostrar configuración completa (sin passwords sensibles)
-          echo "=== CONFIGURACIÓN ACTUAL ==="
-          echo "📋 Variables no sensibles:"
-          grep -v "PASSWORD\|SECRET" .env | head -15
-          echo ""
-          echo "📋 Estructura del archivo .env:"
-          echo "Total de líneas: $(wc -l < .env)"
-          echo "Variables configuradas: $(grep -c '=' .env)"
-          echo ""
-          echo "📋 Variables principales:"
-          grep -E '^(DEBUG|DB_NAME|DB_HOST|DB_PORT|ALLOWED_HOSTS|CORS_)' .env || echo "No se encontraron variables principales"
-
       - name: 🗄️ Setup PostgreSQL
         run: |
           echo "🗄️ Configurando PostgreSQL..."

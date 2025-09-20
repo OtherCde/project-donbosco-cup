@@ -207,7 +207,9 @@ CSRF_TRUSTED_ORIGINS = config(
 # Para PERMITIR LA CONFIGURACION DE LOS USUARIOS
 SESSION_ENGINE = "django.contrib.sessions.backends.db"  # Usa la base de datos para almacenar sesiones
 SESSION_COOKIE_HTTPONLY = True  # Protege la cookie de sesión
-SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", default=False, cast=bool)  # Leído desde .env
+SESSION_COOKIE_SECURE = config(
+    "SESSION_COOKIE_SECURE", default=False, cast=bool
+)  # Leído desde .env
 SESSION_EXPIRE_AT_BROWSER_CLOSE = (
     False  # Permite que la sesión persista después de cerrar el navegador
 )

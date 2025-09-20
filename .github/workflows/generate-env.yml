@@ -12,10 +12,18 @@ on:
           - development
           - staging
           - production
+  
+  # Ejecutar automáticamente en push a develop y main
+  push:
+    branches: [ main, develop ]
+    paths:
+      - '.env.example'
+      - 'project/settings/**'
+      - '.github/workflows/generate-env.yml'
 
 jobs:
   generate-env:
-    name: 🔧 Generate .env for ${{ github.event.inputs.environment }}
+    name: 🔧 Generate .env for ${{ github.event.inputs.environment || (github.ref_name == 'develop' && 'development' || 'production') }}
     runs-on: ubuntu-latest
     
     steps:
@@ -38,12 +46,31 @@ jobs:
           CSRF_COOKIE_SECURE: ${{ secrets.CSRF_COOKIE_SECURE }}
           SECURE_SSL_REDIRECT: ${{ secrets.SECURE_SSL_REDIRECT }}
         run: |
-          echo "🔧 Generando archivo .env completo para ${{ github.event.inputs.environment }}..."
+          echo "🔧 Generando archivo .env completo..."
           
           # Crear .env desde plantilla
           cp env.example .env
           
-          ENVIRONMENT="${{ github.event.inputs.environment }}"
+          # Detectar entorno automáticamente según la rama o usar input manual
+          if [ -n "${{ github.event.inputs.environment }}" ]; then
+            ENVIRONMENT="${{ github.event.inputs.environment }}"
+          else
+            # Detectar entorno según la rama
+            case "${{ github.ref_name }}" in
+              "develop")
+                ENVIRONMENT="development"
+                ;;
+              "main")
+                ENVIRONMENT="production"
+                ;;
+              *)
+                ENVIRONMENT="production"
+                ;;
+            esac
+          fi
+          
+          echo "🎯 Entorno detectado: $ENVIRONMENT"
+          echo "🌿 Rama: ${{ github.ref_name }}"
           
           # Configurar DEBUG según el entorno
           case $ENVIRONMENT in
@@ -85,7 +112,7 @@ jobs:
 
       - name: 📋 Mostrar contenido del .env
         run: |
-          echo "=== ARCHIVO .env GENERADO PARA ${{ github.event.inputs.environment }} ==="
+          echo "=== ARCHIVO .env GENERADO PARA $ENVIRONMENT ==="
           echo ""
           echo "📄 Contenido completo (SIN PASSWORDS):"
           echo "=========================================="
@@ -118,13 +145,13 @@ jobs:
       - name: 💾 Guardar .env como artifact
         uses: actions/upload-artifact@v4
         with:
-          name: env-file-${{ github.event.inputs.environment }}
+          name: env-file-${{ github.ref_name }}-${{ github.sha }}
           path: .env
           retention-days: 30
 
       - name: 📝 Crear comentario con instrucciones
         run: |
-          echo "## 🔧 Archivo .env generado para ${{ github.event.inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "## 🔧 Archivo .env generado para $ENVIRONMENT" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📋 Variables principales configuradas:" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
@@ -141,6 +168,6 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📥 Descarga el archivo:" >> $GITHUB_STEP_SUMMARY
           echo "1. Ve a la sección **Artifacts** de este workflow" >> $GITHUB_STEP_SUMMARY
-          echo "2. Descarga \`env-file-${{ github.event.inputs.environment }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "2. Descarga \`env-file-${{ github.ref_name }}-${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
           echo "3. Renómbralo a \`.env\` en tu servidor" >> $GITHUB_STEP_SUMMARY
           echo "4. Configura las variables sensibles manualmente" >> $GITHUB_STEP_SUMMARY
