@@ -49,7 +49,7 @@ jobs:
           echo "🔧 Generando archivo .env completo..."
           
           # Crear .env desde plantilla
-          cp env.example .env
+          cp .env.example .env
           
           # Detectar entorno automáticamente según la rama o usar input manual
           if [ -n "${{ github.event.inputs.environment }}" ]; then
