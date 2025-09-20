@@ -1,0 +1,122 @@
+name: Django CI
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        # Para develop: solo Python 3.11 (más rápido)
+        # Para main: todas las versiones (más completo)
+        python-version: ${{ github.ref == 'refs/heads/main' && fromJSON('["3.9", "3.10", "3.11", "3.12"]') || fromJSON('["3.11"]') }}
+    
+    steps:
+    - uses: actions/checkout@v4
+   
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+   
+    - name: Cache pip dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+   
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        # Solo instalar herramientas de desarrollo en el job de lint
+   
+    - name: Setup PostgreSQL
+      run: |
+        sudo systemctl start postgresql
+        sudo -u postgres psql -c "CREATE DATABASE test_db;"
+        sudo -u postgres psql -c "CREATE USER test_user WITH PASSWORD 'test_pass';"
+        sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE test_db TO test_user;"
+   
+    - name: Set Database Environment Variables
+      run: |
+        echo "DB_NAME=test_db" >> $GITHUB_ENV
+        echo "DB_USER=test_user" >> $GITHUB_ENV
+        echo "DB_PASSWORD=test_pass" >> $GITHUB_ENV
+        echo "DB_HOST=localhost" >> $GITHUB_ENV
+        echo "DB_PORT=5432" >> $GITHUB_ENV
+        echo "SECRET_KEY=test-secret-key-for-github-actions" >> $GITHUB_ENV
+   
+    - name: Run Django Tests
+      run: |
+        python manage.py test
+   
+    - name: Check Django Configuration
+      run: |
+        python manage.py check
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+   
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
+   
+    - name: Cache pip dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-dev-${{ hashFiles('**/requirements*.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-dev-
+   
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-dev.txt
+   
+    - name: Run Black (Code Formatting Check)
+      run: |
+        black --check --diff .
+   
+    - name: Run isort (Import Sorting Check)
+      run: |
+        isort --check-only --diff .
+   
+    - name: Run Flake8 (Linting)
+      run: |
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+   
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
+   
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-dev.txt
+   
+    - name: Run Safety (Dependency Security Check)
+      run: |
+        safety scan -r requirements.txt --output text || echo "⚠️ Safety scan completed with vulnerabilities found"
+   
+    - name: Run Bandit (Code Security Check)
+      run: |
+        bandit -r . -f json -o bandit-report.json || true
+        bandit -r . -ll

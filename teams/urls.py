@@ -1,7 +1,8 @@
 from django.urls import path
+
 from . import views
 
-app_name = 'teams'
+app_name = "teams"
 
 urlpatterns = [
     # Aquí se agregarán las rutas específicas de teams

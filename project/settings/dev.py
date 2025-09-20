@@ -1,19 +1,43 @@
+from decouple import config
+
 from .base import *
-from pathlib import Path
 
-# Printeamos para ver que que variables obtuvimos
-#print("clave \n", secret)
+# Configuración de desarrollo
+# DEBUG ya se lee desde base.py, pero podemos sobrescribir si es necesario
+# DEBUG = config("DEBUG", default=True, cast=bool)
 
-DEBUG = True
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+# ALLOWED_HOSTS ya se lee desde base.py
+# ALLOWED_HOSTS ya está configurado en base.py desde el .env
 
-# Base de datos SQLite para desarrollo (como en donbosco_cup)
+# Base de datos PostgreSQL para desarrollo
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": config("DB_NAME"),
+        "USER": config("DB_USER"),
+        "PASSWORD": config("DB_PASSWORD"),
+        "HOST": config("DB_HOST"),
+        "PORT": config("DB_PORT"),
     }
 }
 
-# SECRET_KEY para desarrollo
-SECRET_KEY = 'tu-secret-key-aqui-desarrollo-donbosco-cup-2024'
+# SECRET_KEY para desarrollo - ya se lee desde base.py
+# SECRET_KEY ya está configurado en base.py desde el .env
+
+# Configuración adicional para desarrollo
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+# Logging para desarrollo
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+}

@@ -1,0 +1,106 @@
+name: Code Quality
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+  push:
+    branches: [ main, develop ]
+
+jobs:
+  code-quality:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
+    
+    - name: Install Quality Tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install black isort flake8 mypy bandit safety
+    
+    - name: Run Black (Code Formatting)
+      run: |
+        black --check --diff .
+    
+    - name: Run isort (Import Sorting)
+      run: |
+        isort --check-only --diff .
+    
+    - name: Run Flake8 (Linting)
+      run: |
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=venv
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=venv
+    
+    - name: Run MyPy (Type Checking)
+      run: |
+        # Configuración permisiva inicial - se puede endurecer gradualmente
+        mypy . \
+          --ignore-missing-imports \
+          --no-strict-optional \
+          --allow-untyped-defs \
+          --allow-incomplete-defs \
+          --follow-imports=silent \
+          --show-error-codes \
+          --pretty \
+          || echo "⚠️ MyPy encontró errores de tipos (configuración permisiva)"
+    
+    - name: Run Bandit (Security)
+      run: |
+        bandit -r . -ll
+    
+    - name: Run Safety (Dependency Security)
+      run: |
+        safety scan -r requirements.txt --output json || echo "⚠️ Safety scan completed with vulnerabilities found"
+
+  coverage:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
+    
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install coverage pytest-cov
+    
+    - name: Setup PostgreSQL for Tests
+      run: |
+        sudo systemctl start postgresql
+        sudo -u postgres psql -c "CREATE DATABASE test_db;" || echo "Database already exists"
+        sudo -u postgres psql -c "CREATE USER test_user WITH PASSWORD 'test_pass';" || echo "User already exists"
+        sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE test_db TO test_user;" || echo "Privileges already granted"
+    
+    - name: Set Test Environment Variables
+      run: |
+        echo "DB_NAME=test_db" >> $GITHUB_ENV
+        echo "DB_USER=test_user" >> $GITHUB_ENV
+        echo "DB_PASSWORD=test_pass" >> $GITHUB_ENV
+        echo "DB_HOST=localhost" >> $GITHUB_ENV
+        echo "DB_PORT=5432" >> $GITHUB_ENV
+        echo "SECRET_KEY=test-secret-key-for-github-actions" >> $GITHUB_ENV
+    
+    - name: Run Tests with Coverage
+      run: |
+        coverage run --source='.' manage.py test --settings=project.settings.dev
+        coverage report -m
+        coverage xml
+    
+    - name: Upload Coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false

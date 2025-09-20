@@ -1,0 +1,44 @@
+version: 2
+
+updates:
+  # Python (requirements.txt en la raíz)
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "12:00"   # 12:00 UTC ≈ 09:00 Salta (UTC-3)
+    open-pull-requests-limit: 10
+    reviewers: ["robertocarraro"]
+    assignees: ["robertocarraro"]
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    labels: ["dependencies", "python"]
+    groups:
+      django-updates:
+        patterns: ["django*", "djangorestframework*", "dj-rest-auth*"]
+        update-types: ["minor", "patch"]
+      python-security:
+        patterns: ["*"]
+        update-types: ["patch"]
+        dependency-type: "security"
+      other-minor-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "12:00"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    labels: ["dependencies", "github-actions"]
+    groups:
+      actions-updates:
+        patterns: ["actions/*"]
+        update-types: ["minor", "patch"]

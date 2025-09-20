@@ -1,0 +1,121 @@
+"""
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block title %}Cargar Jugadores desde Excel{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">Inicio</a>
+    &rsaquo; <a href="{% url 'admin:teams_team_changelist' %}">Equipos</a>
+    &rsaquo; Cargar Jugadores desde Excel
+</div>
+{% endblock %}
+
+{% block content %}
+<h1>Cargar Jugadores desde Excel</h1>
+
+<div class="module aligned">
+    <h2>Instrucciones</h2>
+    <p>Sube un archivo Excel (.xlsx) con la información de los jugadores.</p>
+    <h3>Formato esperado:</h3>
+    <table class="table">
+        <tr>
+            <th>Columna</th>
+            <th>Datos esperados</th>
+            <th>Ejemplo</th>
+        </tr>
+        <tr>
+            <td>A</td>
+            <td>Número de jugador</td>
+            <td>1, 2, 3...</td>
+        </tr>
+        <tr>
+            <td>B</td>
+            <td>Apellidos</td>
+            <td>GARCÍA LÓPEZ</td>
+        </tr>
+        <tr>
+            <td>C</td>
+            <td>Nombres</td>
+            <td>JUAN CARLOS</td>
+        </tr>
+        <tr>
+            <td>D</td>
+            <td>DNI</td>
+            <td>12345678</td>
+        </tr>
+        <tr>
+            <td>E</td>
+            <td>Fecha de Nacimiento</td>
+            <td>1990-05-15</td>
+        </tr>
+    </table>
+</div>
+
+<form method="post" enctype="multipart/form-data" class="aligned">
+    {% csrf_token %}
+    
+    <div class="form-row">
+        {{ form.team.label_tag }}
+        {{ form.team }}
+        <div class="help">{{ form.team.help_text }}</div>
+    </div>
+    
+    <div class="form-row">
+        {{ form.excel_file.label_tag }}
+        {{ form.excel_file }}
+        <div class="help">{{ form.excel_file.help_text }}</div>
+    </div>
+    
+    <fieldset class="module aligned">
+        <h2>Configuración Avanzada</h2>
+        
+        <div class="form-row">
+            {{ form.header_row.label_tag }}
+            {{ form.header_row }}
+            <div class="help">{{ form.header_row.help_text }}</div>
+        </div>
+        
+        <div class="form-row">
+            {{ form.start_data_row.label_tag }}
+            {{ form.start_data_row }}
+            <div class="help">{{ form.start_data_row.help_text }}</div>
+        </div>
+        
+        <div class="form-row">
+            {{ form.default_position.label_tag }}
+            {{ form.default_position }}
+            <div class="help">{{ form.default_position.help_text }}</div>
+        </div>
+    </fieldset>
+    
+    <div class="submit-row">
+        <input type="submit" value="Procesar Excel" class="default" />
+        <a href="{% url 'admin:teams_team_changelist' %}" class="button cancel-link">Cancelar</a>
+    </div>
+</form>
+
+<style>
+.module h2 {
+    background: #79aec8;
+    color: white;
+    padding: 10px;
+    margin: 0;
+}
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+}
+.table th, .table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+.table th {
+    background-color: #f2f2f2;
+}
+</style>
+{% endblock %}
+"""

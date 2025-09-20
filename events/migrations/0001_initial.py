@@ -9,23 +9,60 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('matches', '0001_initial'),
-        ('teams', '0001_initial'),
+        ("matches", "0001_initial"),
+        ("teams", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='MatchEvent',
+            name="MatchEvent",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('event_type', models.CharField(choices=[('goal', 'Goal'), ('yellow_card', 'Yellow Card'), ('red_card', 'Red Card')], max_length=20)),
-                ('details', models.TextField(blank=True, help_text='Additional event details', null=True)),
-                ('match_team', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='events', to='matches.matchteam')),
-                ('player', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='events', to='teams.player')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "event_type",
+                    models.CharField(
+                        choices=[
+                            ("goal", "Goal"),
+                            ("yellow_card", "Yellow Card"),
+                            ("red_card", "Red Card"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "details",
+                    models.TextField(
+                        blank=True, help_text="Additional event details", null=True
+                    ),
+                ),
+                (
+                    "match_team",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="events",
+                        to="matches.matchteam",
+                    ),
+                ),
+                (
+                    "player",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="events",
+                        to="teams.player",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Match Event',
-                'verbose_name_plural': 'Match Events',
+                "verbose_name": "Match Event",
+                "verbose_name_plural": "Match Events",
             },
         ),
     ]

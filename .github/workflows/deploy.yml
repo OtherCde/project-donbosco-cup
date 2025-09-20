@@ -1,0 +1,71 @@
+name: Deployment to Main
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-project:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configurar SSH
+        run: |
+          echo "🔹 Creando la clave privada..."
+          echo "${{ secrets.SSH_MAIN }}" > private_key
+          chmod 600 private_key 
+          
+          echo "🔹 Iniciando ssh-agent..."
+          eval "$(ssh-agent -s)"
+          
+          export SSH_ASKPASS=/bin/echo
+          echo "🔹 Agregando clave SSH con passphrase..."
+          echo "${{ secrets.SSH_PASSPHRASE }}" | setsid ssh-add private_key
+          
+          echo "🔹 Configurando ~/.ssh/config..."
+          mkdir -p ~/.ssh
+          echo "StrictHostKeyChecking no" >> ~/.ssh/config
+           
+          echo "✅ Configuración SSH completada"
+
+      - name: Conectar al servidor y desplegar Laravel
+        run: |
+          echo "🔹 Verificando existencia de private_key..."
+          ls -l private_key || { echo "⚠️ ERROR: private_key no encontrado"; exit 1; }
+          
+          echo "🔹 Iniciando ssh-agent..."
+          eval "$(ssh-agent -s)"
+          
+          echo "🔹 Agregando clave privada al ssh-agent con passphrase..."
+          echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add private_key 
+          
+          echo "🔹 Conectando al servidor y ejecutando despliegue..."
+          ssh -tt -A -i private_key -o StrictHostKeyChecking=no salesiano-ssh@137.184.135.155 << "EOF"
+            echo "✅ Conectado al servidor"
+            cd ~/htdocs/salesiano.altocodigo.com || exit 1
+
+            if [ ! -f .env ]; then
+              echo "🔹 Preparando despliegue sin eliminar contenido existente..."
+
+              echo "🔹 Clonando el repositorio en carpeta temporal..."
+              git clone https://${{ secrets.PAT_TOKEN }}@github.com/OtherCde/project-donbosco-cup.git || exit 1
+
+              echo "🔹 Cambiando a la rama main"
+              cd project-donbosco-cup || exit 1
+              git checkout main
+
+              echo "🔹 Actualizando repositorio..."
+              git pull origin main
+
+              echo "🔹 Moviendo archivos a la carpeta actual..."
+              shopt -s dotglob
+              mv * ../
+              cd ..
+              rm -rf project-donbosco-cup
+              
+              echo "✅ Despliegue completado"
+            else
+              echo "🔹 El repositorio ya existe. Usa el workflow de actualización."
+            fi
+
+            exit
+          EOF

@@ -1,0 +1,32 @@
+# Development Dependencies
+# Install with: pip install -r requirements-dev.txt
+
+# Include production dependencies
+-r requirements.txt
+
+# Code Formatting
+black==25.1.0
+isort==6.0.1
+
+# Linting
+flake8==7.1.1
+
+# Type Checking
+mypy==1.13.0
+
+# Security
+safety==3.6.1
+bandit==1.7.10
+
+# Testing
+pytest==8.3.4
+pytest-cov==6.0.0
+coverage==7.6.9
+
+# Django Development
+django-debug-toolbar==4.4.6
+django-extensions==3.2.3
+
+# Documentation
+sphinx==7.3.7
+sphinx-rtd-theme==3.0.2

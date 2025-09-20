@@ -10,43 +10,106 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('tournaments', '0001_initial'),
+        ("tournaments", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Team',
+            name="Team",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(help_text='Team name', max_length=100)),
-                ('abbreviation', models.CharField(help_text='e.g., BAR, RMA, BOC', max_length=5)),
-                ('logo_url', models.URLField(blank=True, help_text='Team logo URL', null=True)),
-                ('tournament_category', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='teams', to='tournaments.tournamentcategory')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(help_text="Team name", max_length=100)),
+                (
+                    "abbreviation",
+                    models.CharField(help_text="e.g., BAR, RMA, BOC", max_length=5),
+                ),
+                (
+                    "logo_url",
+                    models.URLField(blank=True, help_text="Team logo URL", null=True),
+                ),
+                (
+                    "tournament_category",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="teams",
+                        to="tournaments.tournamentcategory",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Team',
-                'verbose_name_plural': 'Teams',
-                'ordering': ['tournament_category', 'name'],
-                'unique_together': {('tournament_category', 'name')},
+                "verbose_name": "Team",
+                "verbose_name_plural": "Teams",
+                "ordering": ["tournament_category", "name"],
+                "unique_together": {("tournament_category", "name")},
             },
         ),
         migrations.CreateModel(
-            name='Player',
+            name="Player",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('first_name', models.CharField(max_length=100)),
-                ('last_name', models.CharField(max_length=100)),
-                ('birth_date', models.DateField()),
-                ('position', models.CharField(blank=True, choices=[('GK', 'Goalkeeper'), ('DEF', 'Defender'), ('MID', 'Midfielder'), ('FWD', 'Forward')], max_length=3, null=True)),
-                ('jersey_number', models.CharField(blank=True, max_length=3, null=True)),
-                ('dni', models.CharField(max_length=8, validators=[django.core.validators.RegexValidator(message='DNI must have 7 or 8 digits', regex='^\\d{7,8}$')])),
-                ('team', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='players', to='teams.team')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("first_name", models.CharField(max_length=100)),
+                ("last_name", models.CharField(max_length=100)),
+                ("birth_date", models.DateField()),
+                (
+                    "position",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("GK", "Goalkeeper"),
+                            ("DEF", "Defender"),
+                            ("MID", "Midfielder"),
+                            ("FWD", "Forward"),
+                        ],
+                        max_length=3,
+                        null=True,
+                    ),
+                ),
+                (
+                    "jersey_number",
+                    models.CharField(blank=True, max_length=3, null=True),
+                ),
+                (
+                    "dni",
+                    models.CharField(
+                        max_length=8,
+                        validators=[
+                            django.core.validators.RegexValidator(
+                                message="DNI must have 7 or 8 digits",
+                                regex="^\\d{7,8}$",
+                            )
+                        ],
+                    ),
+                ),
+                (
+                    "team",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="players",
+                        to="teams.team",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Player',
-                'verbose_name_plural': 'Players',
-                'ordering': ['team', 'jersey_number'],
-                'unique_together': {('team', 'dni'), ('team', 'jersey_number')},
+                "verbose_name": "Player",
+                "verbose_name_plural": "Players",
+                "ordering": ["team", "jersey_number"],
+                "unique_together": {("team", "dni"), ("team", "jersey_number")},
             },
         ),
     ]
