@@ -23,42 +23,65 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 🔧 Generate .env file
+        env:
+          # Secretos de GitHub Actions - Todas las variables configuradas
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_USER: ${{ secrets.DB_USER }}
+          ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
+          CSRF_TRUSTED_ORIGINS: ${{ secrets.CSRF_TRUSTED_ORIGINS }}
+          CORS_ALLOWED_ORIGINS: ${{ secrets.CORS_ALLOWED_ORIGINS }}
+          SESSION_COOKIE_SECURE: ${{ secrets.SESSION_COOKIE_SECURE }}
+          CSRF_COOKIE_SECURE: ${{ secrets.CSRF_COOKIE_SECURE }}
+          SECURE_SSL_REDIRECT: ${{ secrets.SECURE_SSL_REDIRECT }}
         run: |
-          echo "🔧 Generando archivo .env para ${{ github.event.inputs.environment }}..."
+          echo "🔧 Generando archivo .env completo para ${{ github.event.inputs.environment }}..."
           
           # Crear .env desde plantilla
           cp env.example .env
           
           ENVIRONMENT="${{ github.event.inputs.environment }}"
           
+          # Configurar DEBUG según el entorno
           case $ENVIRONMENT in
             "development")
               echo "🔹 Configurando para desarrollo..."
               sed -i 's/^DEBUG=.*/DEBUG=True/' .env
-              sed -i 's/^DB_NAME=.*/DB_NAME=donbosco_cup_dev/' .env
-              sed -i 's/^SESSION_COOKIE_SECURE=.*/SESSION_COOKIE_SECURE=False/' .env
-              sed -i 's/^CSRF_COOKIE_SECURE=.*/CSRF_COOKIE_SECURE=False/' .env
-              sed -i 's/^SECURE_SSL_REDIRECT=.*/SECURE_SSL_REDIRECT=False/' .env
               ;;
-            "staging")
-              echo "🔹 Configurando para staging..."
+            "staging"|"production")
+              echo "🔹 Configurando para $ENVIRONMENT..."
               sed -i 's/^DEBUG=.*/DEBUG=False/' .env
-              sed -i 's/^DB_NAME=.*/DB_NAME=donbosco_cup_staging/' .env
-              sed -i 's/^SESSION_COOKIE_SECURE=.*/SESSION_COOKIE_SECURE=True/' .env
-              sed -i 's/^CSRF_COOKIE_SECURE=.*/CSRF_COOKIE_SECURE=True/' .env
-              sed -i 's/^SECURE_SSL_REDIRECT=.*/SECURE_SSL_REDIRECT=True/' .env
-              ;;
-            "production")
-              echo "🔹 Configurando para producción..."
-              sed -i 's/^DEBUG=.*/DEBUG=False/' .env
-              sed -i 's/^DB_NAME=.*/DB_NAME=donbosco_cup_prod/' .env
-              sed -i 's/^SESSION_COOKIE_SECURE=.*/SESSION_COOKIE_SECURE=True/' .env
-              sed -i 's/^CSRF_COOKIE_SECURE=.*/CSRF_COOKIE_SECURE=True/' .env
-              sed -i 's/^SECURE_SSL_REDIRECT=.*/SECURE_SSL_REDIRECT=True/' .env
               ;;
           esac
           
-          echo "✅ Archivo .env generado para $ENVIRONMENT"
+          # Configurar todas las variables desde GitHub Actions
+          echo "🔧 Configurando variables desde GitHub Secrets..."
+          
+          # Variables de base de datos
+          [ -n "$DB_NAME" ] && sed -i "s/^DB_NAME=.*/DB_NAME=$DB_NAME/" .env && echo "✅ DB_NAME configurado"
+          [ -n "$DB_USER" ] && sed -i "s/^DB_USER=.*/DB_USER=$DB_USER/" .env && echo "✅ DB_USER configurado"
+          [ -n "$DB_PASSWORD" ] && sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=$DB_PASSWORD/" .env && echo "✅ DB_PASSWORD configurado"
+          [ -n "$DB_HOST" ] && sed -i "s/^DB_HOST=.*/DB_HOST=$DB_HOST/" .env && echo "✅ DB_HOST configurado"
+          [ -n "$DB_PORT" ] && sed -i "s/^DB_PORT=.*/DB_PORT=$DB_PORT/" .env && echo "✅ DB_PORT configurado"
+          
+          # Variables de Django
+          [ -n "$SECRET_KEY" ] && sed -i "s/^SECRET_KEY=.*/SECRET_KEY=$SECRET_KEY/" .env && echo "✅ SECRET_KEY configurado"
+          
+          # Variables de CORS y CSRF
+          [ -n "$ALLOWED_HOSTS" ] && sed -i "s/^ALLOWED_HOSTS=.*/ALLOWED_HOSTS=$ALLOWED_HOSTS/" .env && echo "✅ ALLOWED_HOSTS configurado"
+          [ -n "$CSRF_TRUSTED_ORIGINS" ] && sed -i "s/^CSRF_TRUSTED_ORIGINS=.*/CSRF_TRUSTED_ORIGINS=$CSRF_TRUSTED_ORIGINS/" .env && echo "✅ CSRF_TRUSTED_ORIGINS configurado"
+          [ -n "$CORS_ALLOWED_ORIGINS" ] && sed -i "s/^CORS_ALLOWED_ORIGINS=.*/CORS_ALLOWED_ORIGINS=$CORS_ALLOWED_ORIGINS/" .env && echo "✅ CORS_ALLOWED_ORIGINS configurado"
+          
+          # Variables de seguridad
+          [ -n "$SESSION_COOKIE_SECURE" ] && sed -i "s/^SESSION_COOKIE_SECURE=.*/SESSION_COOKIE_SECURE=$SESSION_COOKIE_SECURE/" .env && echo "✅ SESSION_COOKIE_SECURE configurado"
+          [ -n "$CSRF_COOKIE_SECURE" ] && sed -i "s/^CSRF_COOKIE_SECURE=.*/CSRF_COOKIE_SECURE=$CSRF_COOKIE_SECURE/" .env && echo "✅ CSRF_COOKIE_SECURE configurado"
+          [ -n "$SECURE_SSL_REDIRECT" ] && sed -i "s/^SECURE_SSL_REDIRECT=.*/SECURE_SSL_REDIRECT=$SECURE_SSL_REDIRECT/" .env && echo "✅ SECURE_SSL_REDIRECT configurado"
+          
+          
+          echo "✅ Archivo .env completo generado para $ENVIRONMENT"
 
       - name: 📋 Mostrar contenido del .env
         run: |
@@ -76,6 +99,21 @@ jobs:
           echo "- Total de líneas: $(wc -l < .env)"
           echo "- Variables configuradas: $(grep -c '=' .env)"
           echo "- Variables sensibles: $(grep -c 'PASSWORD\|SECRET' .env)"
+          echo ""
+          echo "🔍 Variables principales configuradas:"
+          echo "----------------------------------------"
+          grep -E '^(DEBUG|DB_NAME|DB_HOST|DB_PORT|ALLOWED_HOSTS|CORS_|SESSION_COOKIE_SECURE|CSRF_COOKIE_SECURE|SECURE_SSL_REDIRECT|DEVELOPMENT_ENVIRONMENT)' .env || echo "No se encontraron variables principales"
+          echo ""
+          echo "🔐 Variables sensibles (ocultas):"
+          echo "----------------------------------------"
+          grep -E '^(SECRET_KEY|DB_PASSWORD)' .env | sed 's/=.*/=***OCULTO***/' || echo "No se encontraron variables sensibles"
+          echo ""
+          echo "📊 Variables configuradas desde GitHub Secrets:"
+          echo "----------------------------------------"
+          echo "✅ Base de datos: DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT"
+          echo "✅ Django: SECRET_KEY"
+          echo "✅ CORS/CSRF: ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS, CORS_ALLOWED_ORIGINS"
+          echo "✅ Seguridad: SESSION_COOKIE_SECURE, CSRF_COOKIE_SECURE, SECURE_SSL_REDIRECT"
 
       - name: 💾 Guardar .env como artifact
         uses: actions/upload-artifact@v4
