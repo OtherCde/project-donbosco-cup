@@ -76,11 +76,11 @@ jobs:
           case $ENVIRONMENT in
             "development")
               echo "🔹 Configurando para desarrollo..."
-              sed -i 's/^DEBUG=.*/DEBUG=True/' .env
+              sed -i 's/^DEBUG=.*/DEBUG=True/' env-generated
               ;;
             "staging"|"production")
               echo "🔹 Configurando para $ENVIRONMENT..."
-              sed -i 's/^DEBUG=.*/DEBUG=False/' .env
+              sed -i 's/^DEBUG=.*/DEBUG=False/' env-generated
               ;;
           esac
           
