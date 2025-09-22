@@ -1,0 +1,211 @@
+name: 🚀 Deploy with Auto .env Generation
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Entorno para deployment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+
+jobs:
+  deploy-with-env:
+    name: 🚀 Deploy to Server with .env Generation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🔧 Generate .env file locally
+        env:
+          # Secretos de GitHub Actions - Todas las variables configuradas
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_USER: ${{ secrets.DB_USER }}
+          ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
+          CSRF_TRUSTED_ORIGINS: ${{ secrets.CSRF_TRUSTED_ORIGINS }}
+          CORS_ALLOWED_ORIGINS: ${{ secrets.CORS_ALLOWED_ORIGINS }}
+          SESSION_COOKIE_SECURE: ${{ secrets.SESSION_COOKIE_SECURE }}
+          CSRF_COOKIE_SECURE: ${{ secrets.CSRF_COOKIE_SECURE }}
+          SECURE_SSL_REDIRECT: ${{ secrets.SECURE_SSL_REDIRECT }}
+        run: |
+          echo "🔧 Generando archivo .env para deployment..."
+          
+          # Verificar que existe .env.example
+          if [ ! -f .env.example ]; then
+            echo "❌ ERROR: No se encontró .env.example en el repositorio"
+            exit 1
+          fi
+          
+          # Crear archivo de configuración desde plantilla
+          cp .env.example .env
+          
+          # Detectar entorno
+          ENVIRONMENT="${{ github.event.inputs.environment }}"
+          
+          echo "🎯 Entorno configurado: $ENVIRONMENT"
+          
+          # Configurar DEBUG según el entorno
+          case $ENVIRONMENT in
+            "development")
+              echo "🔹 Configurando para desarrollo..."
+              sed -i 's/^DEBUG=.*/DEBUG=True/' .env
+              ;;
+            "staging"|"production")
+              echo "🔹 Configurando para $ENVIRONMENT..."
+              sed -i 's/^DEBUG=.*/DEBUG=False/' .env
+              ;;
+          esac
+          
+          # Configurar todas las variables desde GitHub Actions
+          echo "🔧 Configurando variables desde GitHub Secrets..."
+          
+          # Variables de base de datos
+          [ -n "$DB_NAME" ] && sed -i "s/^DB_NAME=.*/DB_NAME=$DB_NAME/" .env && echo "✅ DB_NAME configurado"
+          [ -n "$DB_USER" ] && sed -i "s/^DB_USER=.*/DB_USER=$DB_USER/" .env && echo "✅ DB_USER configurado"
+          [ -n "$DB_PASSWORD" ] && sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=$DB_PASSWORD/" .env && echo "✅ DB_PASSWORD configurado"
+          [ -n "$DB_HOST" ] && sed -i "s/^DB_HOST=.*/DB_HOST=$DB_HOST/" .env && echo "✅ DB_HOST configurado"
+          [ -n "$DB_PORT" ] && sed -i "s/^DB_PORT=.*/DB_PORT=$DB_PORT/" .env && echo "✅ DB_PORT configurado"
+          
+          # Variables de Django
+          [ -n "$SECRET_KEY" ] && sed -i "s/^SECRET_KEY=.*/SECRET_KEY=$SECRET_KEY/" .env && echo "✅ SECRET_KEY configurado"
+          
+          # Variables de CORS y CSRF
+          [ -n "$ALLOWED_HOSTS" ] && sed -i "s/^ALLOWED_HOSTS=.*/ALLOWED_HOSTS=$ALLOWED_HOSTS/" .env && echo "✅ ALLOWED_HOSTS configurado"
+          [ -n "$CSRF_TRUSTED_ORIGINS" ] && sed -i "s/^CSRF_TRUSTED_ORIGINS=.*/CSRF_TRUSTED_ORIGINS=$CSRF_TRUSTED_ORIGINS/" .env && echo "✅ CSRF_TRUSTED_ORIGINS configurado"
+          [ -n "$CORS_ALLOWED_ORIGINS" ] && sed -i "s/^CORS_ALLOWED_ORIGINS=.*/CORS_ALLOWED_ORIGINS=$CORS_ALLOWED_ORIGINS/" .env && echo "✅ CORS_ALLOWED_ORIGINS configurado"
+          
+          # Variables de seguridad
+          [ -n "$SESSION_COOKIE_SECURE" ] && sed -i "s/^SESSION_COOKIE_SECURE=.*/SESSION_COOKIE_SECURE=$SESSION_COOKIE_SECURE/" .env && echo "✅ SESSION_COOKIE_SECURE configurado"
+          [ -n "$CSRF_COOKIE_SECURE" ] && sed -i "s/^CSRF_COOKIE_SECURE=.*/CSRF_COOKIE_SECURE=$CSRF_COOKIE_SECURE/" .env && echo "✅ CSRF_COOKIE_SECURE configurado"
+          [ -n "$SECURE_SSL_REDIRECT" ] && sed -i "s/^SECURE_SSL_REDIRECT=.*/SECURE_SSL_REDIRECT=$SECURE_SSL_REDIRECT/" .env && echo "✅ SECURE_SSL_REDIRECT configurado"
+          
+          echo "✅ Archivo .env generado para $ENVIRONMENT"
+
+      - name: 📋 Mostrar resumen del .env generado
+        run: |
+          echo "=== RESUMEN DEL .env GENERADO ==="
+          echo ""
+          echo "📊 Estadísticas:"
+          echo "- Total de líneas: $(wc -l < .env)"
+          echo "- Variables configuradas: $(grep -c '=' .env)"
+          echo "- Variables sensibles: $(grep -c 'PASSWORD\|SECRET' .env)"
+          echo ""
+          echo "🔍 Variables principales (sin valores sensibles):"
+          echo "----------------------------------------"
+          grep -E '^(DEBUG|DB_NAME|DB_HOST|DB_PORT|ALLOWED_HOSTS|CORS_|SESSION_COOKIE_SECURE|CSRF_COOKIE_SECURE|SECURE_SSL_REDIRECT)' .env || echo "No se encontraron variables principales"
+          echo ""
+          echo "🔐 Variables sensibles (ocultas):"
+          echo "----------------------------------------"
+          grep -E '^(SECRET_KEY|DB_PASSWORD)' .env | sed 's/=.*/=***OCULTO***/' || echo "No se encontraron variables sensibles"
+
+      - name: 🔑 Configurar SSH
+        run: |
+          echo "🔹 Creando la clave privada..."
+          echo "${{ secrets.SSH_MAIN }}" > private_key
+          chmod 600 private_key 
+          
+          echo "🔹 Iniciando ssh-agent..."
+          eval "$(ssh-agent -s)"
+          
+          export SSH_ASKPASS=/bin/echo
+          echo "🔹 Agregando clave SSH con passphrase..."
+          echo "${{ secrets.SSH_PASSPHRASE }}" | setsid ssh-add private_key
+          
+          echo "🔹 Configurando ~/.ssh/config..."
+          mkdir -p ~/.ssh
+          echo "StrictHostKeyChecking no" >> ~/.ssh/config
+           
+          echo "✅ Configuración SSH completada"
+
+      - name: 🚀 Deploy con .env automático
+        run: |
+          echo "🔹 Verificando existencia de private_key..."
+          ls -l private_key || { echo "⚠️ ERROR: private_key no encontrado"; exit 1; }
+          
+          echo "🔹 Verificando existencia de .env..."
+          ls -l .env || { echo "⚠️ ERROR: .env no encontrado"; exit 1; }
+          
+          echo "🔹 Iniciando ssh-agent..."
+          eval "$(ssh-agent -s)"
+          
+          echo "🔹 Agregando clave privada al ssh-agent con passphrase..."
+          echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add private_key 
+          
+          echo "🔹 Copiando archivo .env al servidor..."
+          scp -i private_key -o StrictHostKeyChecking=no .env salesiano-ssh@137.184.135.155:~/htdocs/salesiano.altocodigo.com/.env
+          
+          echo "🔹 Conectando al servidor para actualizar código y verificar .env..."
+          ssh -tt -A -i private_key -o StrictHostKeyChecking=no salesiano-ssh@137.184.135.155 << "EOF"
+            echo "✅ Conectado al servidor"
+            cd ~/htdocs/salesiano.altocodigo.com || exit 1
+
+            echo "🔹 Configurando Git para el directorio actual..."
+            git config --global --add safe.directory /home/altocodigo-salesiano/htdocs/salesiano.altocodigo.com || echo "⚠️ Warning: No se pudo configurar safe.directory"
+            
+            echo "🔹 Actualizando código existente..."
+            git pull origin main || { echo "⚠️ Error en git pull"; exit 1; }
+            echo "✅ Código actualizado"
+
+            echo "🔹 Verificando que el archivo .env se copió correctamente..."
+            
+            if [ -f .env ]; then
+              echo "✅ Archivo .env encontrado en el servidor"
+              echo "📊 Variables configuradas: $(grep -c '=' .env)"
+              echo "🔍 Entorno configurado: ${{ github.event.inputs.environment }}"
+              
+              # Mostrar algunas variables no sensibles para verificación
+              echo "🔍 Variables principales:"
+              grep -E '^(DEBUG|DB_NAME|DB_HOST|DB_PORT|ALLOWED_HOSTS)' .env || echo "No se encontraron variables principales"
+              
+              # Verificar permisos del archivo .env
+              echo "🔍 Permisos del archivo .env:"
+              ls -la .env
+              
+            else
+              echo "❌ ERROR: Archivo .env no encontrado en el servidor después de la copia"
+              exit 1
+            fi
+
+            echo ""
+            echo "🎉 CONFIGURACIÓN .env COMPLETADA EXITOSAMENTE"
+            echo "=============================================="
+            echo "✅ Código actualizado"
+            echo "✅ Archivo .env copiado al servidor"
+            echo "✅ Todas las variables desde GitHub Secrets aplicadas"
+            echo "✅ Entorno: ${{ github.event.inputs.environment }}"
+            echo "=============================================="
+
+            exit
+          EOF
+
+      - name: 📝 Crear resumen del deployment
+        run: |
+          echo "## 🔧 Configuración .env Completada" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Acciones realizadas:" >> $GITHUB_STEP_SUMMARY
+          echo "- **Código actualizado** desde la rama \`main\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Archivo .env generado** localmente con todas las variables" >> $GITHUB_STEP_SUMMARY
+          echo "- **Archivo .env copiado** al servidor automáticamente" >> $GITHUB_STEP_SUMMARY
+          echo "- **Variables configuradas** desde GitHub Secrets" >> $GITHUB_STEP_SUMMARY
+          echo "- **Entorno**: ${{ github.event.inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔧 Variables configuradas automáticamente:" >> $GITHUB_STEP_SUMMARY
+          echo "- Base de datos: \`DB_NAME\`, \`DB_USER\`, \`DB_PASSWORD\`, \`DB_HOST\`, \`DB_PORT\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Django: \`SECRET_KEY\`" >> $GITHUB_STEP_SUMMARY
+          echo "- CORS/CSRF: \`ALLOWED_HOSTS\`, \`CSRF_TRUSTED_ORIGINS\`, \`CORS_ALLOWED_ORIGINS\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Seguridad: \`SESSION_COOKIE_SECURE\`, \`CSRF_COOKIE_SECURE\`, \`SECURE_SSL_REDIRECT\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🎯 Próximos pasos:" >> $GITHUB_STEP_SUMMARY
+          echo "1. Verificar que la aplicación esté funcionando correctamente" >> $GITHUB_STEP_SUMMARY
+          echo "2. Revisar logs del servidor si es necesario" >> $GITHUB_STEP_SUMMARY
+          echo "3. ¡Tu aplicación está lista para usar! 🎉" >> $GITHUB_STEP_SUMMARY

@@ -26,10 +26,14 @@ Notas:
 from django import forms
 from django.contrib import admin
 from django.utils.html import format_html
-from teams.models import Player
+
 from events.models import MatchEvent
+from teams.models import Player
+
 from .models import Match, MatchTeam
+
 # admin.py for events app
+
 
 class MatchEventInlineForm(forms.ModelForm):
     """
@@ -37,7 +41,7 @@ class MatchEventInlineForm(forms.ModelForm):
     Filtra los jugadores según el equipo del MatchTeam padre.
     El campo 'player' solo muestra jugadores del equipo correspondiente.
     """
-    
+
     class Meta:
         model = MatchEvent
         fields = "__all__"
@@ -59,7 +63,7 @@ class MatchEventInline(admin.TabularInline):
     Permite agregar eventos directamente desde el equipo en el partido.
     Filtra los jugadores según el equipo del MatchTeam padre.
     """
-    
+
     model = MatchEvent
     form = MatchEventInlineForm
     extra = 1
@@ -77,7 +81,6 @@ class MatchEventInline(admin.TabularInline):
                 return super()._construct_form(i, **kwargs)
 
         return CustomFormSet
-
 
 
 class MatchTeamInline(admin.TabularInline):
@@ -181,10 +184,10 @@ class MatchTeamAdmin(admin.ModelAdmin):
     - win: Victoria (3 puntos)
     - loss: Derrota (0 puntos)
     - draw: Empate (1 punto)
-    
+
     Gestión de eventos del partido (goles, tarjetas) mediante inline
     - Inline para gestionar eventos del partido (goles, tarjetas)
-    
+
     """
 
     list_display = ["team", "match_info", "goals", "penalty_goals", "result", "points"]
@@ -203,5 +206,3 @@ class MatchTeamAdmin(admin.ModelAdmin):
         return f"{obj.match.date} - {obj.match.round.round_name}"
 
     match_info.short_description = "Info del Partido"
-
-

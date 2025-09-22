@@ -39,6 +39,7 @@ class PlayerInline(admin.TabularInline):
     Permite agregar jugadores sin salir de la vista del equipo.
     Campos ordenados por número de camiseta.
     """
+
     model = Player
     extra = 1
     fields = [
@@ -194,6 +195,7 @@ class PlayerAdmin(admin.ModelAdmin):
     def age(self, obj):
         """Calcula automáticamente la edad del jugador"""
         from datetime import date
+
         today = date.today()
         return (
             today.year
