@@ -50,9 +50,7 @@ class TournamentAdmin(admin.ModelAdmin):
     search_fields = ["name", "year"]
     ordering = ["-year", "name"]
 
-    fieldsets = (
-        ("Información del Torneo", {"fields": ("name", "year")}),
-    )
+    fieldsets = (("Información del Torneo", {"fields": ("name", "year")}),)
 
 
 class PhaseInline(admin.TabularInline):

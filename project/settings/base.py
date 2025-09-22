@@ -80,7 +80,7 @@ LOCAL_APPS = (
     "matches",
     "events",
     "project",  # Para la configuración del admin
-    "api",      # Para la API REST
+    "api",  # Para la API REST
 )
 
 # Aplicaciones Locales

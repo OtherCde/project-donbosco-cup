@@ -22,10 +22,8 @@ from django.urls import include, path
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    
     # API REST para usuarios con permisos limitados
     path("api/", include("api.urls")),
-    
     # Página principal del torneo
     path("", include("tournaments.urls", namespace="home")),
     # Rutas para TORNEOS

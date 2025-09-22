@@ -171,7 +171,7 @@ class PlayerAdmin(admin.ModelAdmin):
         "team__tournament_category",
         "team",
         "promo",  # permite filtrar por promoción
-        "profession", # filtra por profesión
+        "profession",  # filtra por profesión
     ]
     search_fields = [
         "first_name",
@@ -186,7 +186,16 @@ class PlayerAdmin(admin.ModelAdmin):
     fieldsets = (
         (
             "Información Personal",
-            {"fields": ("first_name", "last_name", "birth_date", "dni", "phone_number", "profession")},
+            {
+                "fields": (
+                    "first_name",
+                    "last_name",
+                    "birth_date",
+                    "dni",
+                    "phone_number",
+                    "profession",
+                )
+            },
         ),
         ("Promoción", {"fields": ("promo",)}),
         ("Información del Equipo", {"fields": ("team", "jersey_number", "position")}),

@@ -51,10 +51,10 @@ class Player(models.Model):
         blank=True,
     )
     profession = models.CharField(
-        max_length=100, 
-        null=True, 
-        blank=True, 
-        help_text="Oficio o profesión (Ej: Ingeniero, Lic. Trabajo Social)"
+        max_length=100,
+        null=True,
+        blank=True,
+        help_text="Oficio o profesión (Ej: Ingeniero, Lic. Trabajo Social)",
     )
 
     class Meta:

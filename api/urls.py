@@ -22,7 +22,7 @@ Autenticación:
 - Permisos por grupo de usuario (CRUD_Users, ReadOnly_Users)
 """
 
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -30,35 +30,42 @@ from rest_framework_simplejwt.views import (
 )
 
 from api.viewsets.base import (
-    TournamentViewSet, TournamentCategoryViewSet, PhaseViewSet, RoundViewSet,
-    TeamViewSet, PlayerViewSet, MatchViewSet, MatchTeamViewSet,
-    MatchEventViewSet, UserViewSet
+    MatchEventViewSet,
+    MatchTeamViewSet,
+    MatchViewSet,
+    PhaseViewSet,
+    PlayerViewSet,
+    RoundViewSet,
+    TeamViewSet,
+    TournamentCategoryViewSet,
+    TournamentViewSet,
+    UserViewSet,
 )
 
 # Crear el router de DRF
 router = DefaultRouter()
 
 # Registrar todos los ViewSets
-router.register(r'tournaments', TournamentViewSet, basename='tournament')
-router.register(r'categories', TournamentCategoryViewSet, basename='tournamentcategory')
-router.register(r'phases', PhaseViewSet, basename='phase')
-router.register(r'rounds', RoundViewSet, basename='round')
-router.register(r'teams', TeamViewSet, basename='team')
-router.register(r'players', PlayerViewSet, basename='player')
-router.register(r'matches', MatchViewSet, basename='match')
-router.register(r'match-teams', MatchTeamViewSet, basename='matchteam')
-router.register(r'events', MatchEventViewSet, basename='matchevent')
-router.register(r'users', UserViewSet, basename='user')
+router.register(r"tournaments", TournamentViewSet, basename="tournament")
+router.register(r"categories", TournamentCategoryViewSet, basename="tournamentcategory")
+router.register(r"phases", PhaseViewSet, basename="phase")
+router.register(r"rounds", RoundViewSet, basename="round")
+router.register(r"teams", TeamViewSet, basename="team")
+router.register(r"players", PlayerViewSet, basename="player")
+router.register(r"matches", MatchViewSet, basename="match")
+router.register(r"match-teams", MatchTeamViewSet, basename="matchteam")
+router.register(r"events", MatchEventViewSet, basename="matchevent")
+router.register(r"users", UserViewSet, basename="user")
 
 # URLs de la API
 urlpatterns = [
     # URLs del router (todos los endpoints CRUD)
-    path('', include(router.urls)),
-    
+    path("", include(router.urls)),
     # URLs de autenticación JWT
-    path('auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    
+    path("auth/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("auth/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     # URLs adicionales para funcionalidades específicas
-    path('auth/', include('rest_framework.urls')),  # Para autenticación en browsable API
+    path(
+        "auth/", include("rest_framework.urls")
+    ),  # Para autenticación en browsable API
 ]
