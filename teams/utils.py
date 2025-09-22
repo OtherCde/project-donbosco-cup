@@ -104,6 +104,12 @@ def find_column_mapping(headers):
         elif any(word in header for word in ["PROMO", "PROMOCION", "CLASS", "YEAR"]):
             mapping["promocion"] = col
 
+        # Mapear oficio/profesión
+        elif any(
+            word in header for word in ["OFICIO", "PROFESION", "OCCUPATION", "JOB"]
+        ):
+            mapping["oficio"] = col
+
     print(f"Mapeo de columnas: {mapping}")
     return mapping
 
@@ -192,6 +198,39 @@ def extract_player_from_row(worksheet, row, column_mapping, default_position):
 
     # Información adicional para debugging
     player_data["row_number"] = row
+
+    # Celular/Teléfono
+    if "celular" in column_mapping:
+        celular = worksheet.cell(row=row, column=column_mapping["celular"]).value
+        if celular:
+            player_data["phone"] = str(celular).strip()
+        else:
+            player_data["phone"] = ""
+    else:
+        player_data["phone"] = ""
+
+    # Promoción
+    if "promocion" in column_mapping:
+        promocion = worksheet.cell(row=row, column=column_mapping["promocion"]).value
+        if promocion:
+            try:
+                player_data["promo"] = int(promocion)
+            except:
+                player_data["promo"] = None
+        else:
+            player_data["promo"] = None
+    else:
+        player_data["promo"] = None
+
+    # Oficio/Profesión
+    if "oficio" in column_mapping:
+        oficio = worksheet.cell(row=row, column=column_mapping["oficio"]).value
+        if oficio:
+            player_data["profession"] = str(oficio).strip()
+        else:
+            player_data["profession"] = ""
+    else:
+        player_data["profession"] = ""
 
     return player_data
 

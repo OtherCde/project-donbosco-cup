@@ -62,6 +62,8 @@ DJANGO_APPS = (
     "rest_framework_simplejwt",
     # CORS Headers
     "corsheaders",
+    # Django Filter
+    "django_filters",
 )
 
 # Aplicaciones de Terceros
@@ -78,6 +80,7 @@ LOCAL_APPS = (
     "matches",
     "events",
     "project",  # Para la configuración del admin
+    "api",  # Para la API REST
 )
 
 # Aplicaciones Locales

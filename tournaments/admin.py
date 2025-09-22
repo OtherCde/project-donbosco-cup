@@ -38,7 +38,6 @@ class TournamentAdmin(admin.ModelAdmin):
     Campos principales:
     - name: Nombre del torneo
     - year: Año del torneo
-    - start_date/end_date: Fechas de inicio y fin
 
     Funcionalidades:
     - Filtrado por año y fecha
@@ -46,16 +45,12 @@ class TournamentAdmin(admin.ModelAdmin):
     - Jerarquía de fechas para navegación fácil
     """
 
-    list_display = ["name", "year", "start_date", "end_date"]
-    list_filter = ["year", "start_date"]
+    list_display = ["name", "year"]
+    list_filter = ["year"]
     search_fields = ["name", "year"]
     ordering = ["-year", "name"]
-    date_hierarchy = "start_date"
 
-    fieldsets = (
-        ("Información del Torneo", {"fields": ("name", "year")}),
-        ("Fechas", {"fields": ("start_date", "end_date")}),
-    )
+    fieldsets = (("Información del Torneo", {"fields": ("name", "year")}),)
 
 
 class PhaseInline(admin.TabularInline):
@@ -83,7 +78,6 @@ class TournamentCategoryAdmin(admin.ModelAdmin):
     - tournament: Torneo al que pertenece
     - category_name: Nombre de la categoría
     - description: Descripción opcional
-    - start_date/end_date: Fechas específicas de la categoría
 
     Funcionalidades:
     - Inline para gestionar fases directamente
@@ -93,8 +87,8 @@ class TournamentCategoryAdmin(admin.ModelAdmin):
     Nota: Cada categoría representa un grupo de equipos de edades similares
     """
 
-    list_display = ["category_name", "tournament", "start_date", "end_date"]
-    list_filter = ["tournament", "start_date"]
+    list_display = ["category_name", "tournament"]
+    list_filter = ["tournament"]
     search_fields = ["category_name", "tournament__name"]
     ordering = ["tournament", "category_name"]
     inlines = [PhaseInline]
@@ -104,7 +98,6 @@ class TournamentCategoryAdmin(admin.ModelAdmin):
             "Información de la Categoría",
             {"fields": ("tournament", "category_name", "description")},
         ),
-        ("Fechas", {"fields": ("start_date", "end_date")}),
     )
 
 

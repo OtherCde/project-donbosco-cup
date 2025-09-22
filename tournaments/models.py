@@ -25,8 +25,6 @@ class TournamentCategory(models.Model):
         max_length=100, help_text="e.g., Class of 2019, Under-16"
     )
     description = models.TextField(blank=True, null=True)
-    start_date = models.DateField()
-    end_date = models.DateField()
 
     class Meta:
         verbose_name = "Categoría del Torneo"
