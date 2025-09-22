@@ -48,9 +48,9 @@ class PlayerInline(admin.TabularInline):
         "position",
         "dni",
         "birth_date",
-        "telefono",
+        "phone_number",
         "promo",
-        "oficio",
+        "profession",
     ]
     ordering = ["jersey_number"]
 
@@ -137,9 +137,9 @@ class PlayerAdmin(admin.ModelAdmin):
     - team: Equipo al que pertenece
     - jersey_number: Número de camiseta
     - position: Posición en el campo
-    - telefono: Número de teléfono (opcional)
+    - phone_number: Número de teléfono (opcional)
     - promo: Año de la promoción (opcional)
-    - oficio: Oficio o profesión (opcional)
+    - profession: Oficio o profesión (opcional)
 
     Funcionalidades:
     - Cálculo automático de edad
@@ -152,7 +152,7 @@ class PlayerAdmin(admin.ModelAdmin):
     - Número de camiseta: único por equipo
     - DNI: único por equipo
 
-    Nota: Los campos 'telefono', 'promo' y 'oficio' son opcionales y pueden ser utilizados para almacenar información adicional sobre el jugador.
+    Nota: Los campos 'phone_number', 'promo' y 'profession' son opcionales y pueden ser utilizados para almacenar información adicional sobre el jugador.
     """
 
     list_display = [
@@ -161,31 +161,31 @@ class PlayerAdmin(admin.ModelAdmin):
         "team",
         "position",
         "age",
-        "telefono",
+        "phone_number",
         "promo",
-        "oficio",
+        "profession",
     ]
     list_filter = [
         "position",
         "team__tournament_category",
         "team",
         "promo",  # permite filtrar por promoción
-        "oficio", # filtra por profesión
+        "profession", # filtra por profesión
     ]
     search_fields = [
         "first_name",
         "last_name",
         "dni",
         "jersey_number",
-        "telefono",
-        "oficio",
+        "phone_number",
+        "profession",
     ]
     ordering = ["team", "jersey_number"]
 
     fieldsets = (
         (
             "Información Personal",
-            {"fields": ("first_name", "last_name", "birth_date", "dni", "telefono", "oficio")},
+            {"fields": ("first_name", "last_name", "birth_date", "dni", "phone_number", "profession")},
         ),
         ("Promoción", {"fields": ("promo",)}),
         ("Información del Equipo", {"fields": ("team", "jersey_number", "position")}),

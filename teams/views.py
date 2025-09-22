@@ -74,6 +74,9 @@ def upload_players_from_excel(request):
                             position=player_data["position"],
                             birth_date=player_data["birth_date"],
                             dni=player_data["dni"],
+                            phone_number=player_data["phone"],
+                            promo=player_data["promo"],
+                            profession=player_data["profession"],
                         )
                         created_players.append(player)
 
