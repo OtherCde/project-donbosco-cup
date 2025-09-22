@@ -26,8 +26,10 @@ Notas:
 from django import forms
 from django.contrib import admin
 from django.utils.html import format_html
-from teams.models import Player
+
 from events.models import MatchEvent
+from teams.models import Player
+
 from .models import Match, MatchTeam
 
 # admin.py for events app
