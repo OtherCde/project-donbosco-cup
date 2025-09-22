@@ -49,8 +49,12 @@ class MatchTeam(models.Model):
     team = models.ForeignKey(
         Team, on_delete=models.CASCADE, related_name="team_matches"
     )
-    goals = models.IntegerField(default=0, validators=[MinValueValidator(0)])
-    penalty_goals = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    goals = models.IntegerField(
+        null=True, blank=True, validators=[MinValueValidator(0)]
+    )
+    penalty_goals = models.IntegerField(
+        null=True, blank=True, validators=[MinValueValidator(0)]
+    )
     result = models.CharField(
         max_length=10, choices=RESULT_CHOICES, blank=True, null=True
     )
