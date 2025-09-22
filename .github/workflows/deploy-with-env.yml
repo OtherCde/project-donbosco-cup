@@ -149,6 +149,9 @@ jobs:
             echo "✅ Conectado al servidor"
             cd ~/htdocs/salesiano.altocodigo.com || exit 1
 
+            echo "🔹 Configurando Git para el directorio actual..."
+            git config --global --add safe.directory /home/altocodigo-salesiano/htdocs/salesiano.altocodigo.com || echo "⚠️ Warning: No se pudo configurar safe.directory"
+            
             echo "🔹 Actualizando código existente..."
             git pull origin main || { echo "⚠️ Error en git pull"; exit 1; }
             echo "✅ Código actualizado"
